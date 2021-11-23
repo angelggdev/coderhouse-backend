@@ -27,8 +27,9 @@ app.get('/productoRandom', (request, response) => {
         try {
             const productos = await contenedor.getAll();
             const ids = productos.map((x) => x.id);
-            const id = Math.ceil(Math.random() * ids.length);
-            const item = await contenedor.getById(id);
+            const item = await contenedor.getById(
+                Math.ceil(Math.random() * ids.length)
+            );
             response.send(item);
         } catch (err) {
             response.send(err);
