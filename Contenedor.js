@@ -5,9 +5,17 @@ class Contenedor {
 
     save(object) {
         const id = this.productList.length === 0 ? 1 : this.productList[this.productList.length - 1].id + 1;
-        this.productList.push({ ...object, id });
-        console.log(`se agregó un producto con el id ${id}`);
-        return id;
+        if (object.id) {
+            let objectIndex;
+            this.productList.forEach((x, i) => x.id === object.id && (objectIndex = i));
+            this.productList[objectIndex] = object;
+            console.log(`se actualizó el producto con el id ${object.id}`);
+            return object.id;
+        } else {
+            this.productList.push({ ...object, id: id });
+            console.log(`se agregó un producto con el id ${id}`);
+            return id;
+        }
     }
 
     getById(number) {
