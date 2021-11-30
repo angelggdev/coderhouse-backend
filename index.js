@@ -1,5 +1,5 @@
 const express = require('express');
-const {Router} = express;
+const { Router } = express;
 const Contenedor = require('./Contenedor.js');
 
 const app = express();
@@ -28,7 +28,7 @@ const contenedor = new Contenedor([
     },
 ]);
 
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 const router = Router();
 
@@ -46,26 +46,33 @@ router.get('/', (request, response) => {
 router.get('/:id', (request, response) => {
     const id = parseInt(request.params.id);
     const item = contenedor.getById(id);
-    item ? response.send(item): response.send({error: 'producto no encontrado'});
+    item
+        ? response.send(item)
+        : response.send({ error: 'producto no encontrado' });
 });
 
 router.post('/', (request, response) => {
     const operation = contenedor.save({
-        title:request.body.title,
-        price:request.body.price,
-        thumbnail: request.body.thumbnail
+        title: request.body.title,
+        price: request.body.price,
+        thumbnail: request.body.thumbnail,
     });
-    response.send(`se agregó un producto con el id ${operation}`)
+    response.send(`se agregó un producto con el id ${operation}`);
 });
 
 router.put('/:id', (request, response) => {
-    const operation = contenedor.save({
-        id:parseInt(request.params.id),
-        title:request.body.title,
-        price:request.body.price,
-        thumbnail: request.body.thumbnail
+    contenedor.save({
+        id: parseInt(request.params.id),
+        title: request.body.title,
+        price: request.body.price,
+        thumbnail: request.body.thumbnail,
     });
-    response.send(`se actualizó un producto con el id ${operation}`)
+    response.send(`se actualizó un producto con el id ${request.params.id}`);
+});
+
+router.delete('/:id', (request, response) => {
+    contenedor.deleteById(parseInt(request.params.id));
+    response.send(`producto con id ${request.params.id} eliminado`);
 });
 
 app.use('/api/productos', router);

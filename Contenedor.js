@@ -4,10 +4,15 @@ class Contenedor {
     }
 
     save(object) {
-        const id = this.productList.length === 0 ? 1 : this.productList[this.productList.length - 1].id + 1;
+        const id =
+            this.productList.length === 0
+                ? 1
+                : this.productList[this.productList.length - 1].id + 1;
         if (object.id) {
             let objectIndex;
-            this.productList.forEach((x, i) => x.id === object.id && (objectIndex = i));
+            this.productList.forEach(
+                (x, i) => x.id === object.id && (objectIndex = i)
+            );
             this.productList[objectIndex] = object;
             console.log(`se actualizó el producto con el id ${object.id}`);
             return object.id;
@@ -30,7 +35,7 @@ class Contenedor {
     }
 
     getAll() {
-        if (this.productList.length > 0){
+        if (this.productList.length > 0) {
             return this.productList;
         } else {
             console.log('no se han encontrado productos');
