@@ -28,6 +28,9 @@ const contenedor = new Contenedor([
     },
 ]);
 
+app.set('views', './views');
+app.set('view engine', 'ejs');
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 const router = Router();
@@ -40,7 +43,9 @@ server.on('error', (error) => {
 });
 
 router.get('/', (request, response) => {
-    response.send(contenedor.getAll());
+    const list = contenedor.getAll();
+    const showList = list.length > 0 ? true: false;
+    response.render('productos.ejs', {list: list, showList: showList});
 });
 
 router.get('/:id', (request, response) => {
@@ -57,7 +62,7 @@ router.post('/', (request, response) => {
         price: request.body.price,
         thumbnail: request.body.thumbnail,
     });
-    response.send(`se agregó un producto con el id ${operation}`);
+    response.redirect('/');
 });
 
 router.put('/:id', (request, response) => {
