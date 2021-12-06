@@ -1,0 +1,19 @@
+html 
+    head
+        title="Productos"
+    body
+        if showList 
+            table 
+                tr
+                    th Nombre del producto
+                    th Precio
+                    th Imagen
+                each product in list
+                    tr
+                        td=product.title
+                        td=product.price
+                        td
+                            img(src=product.thumbnail, alt=product.title, width='100px')
+        else
+            h2 No hay productos
+        a(href='/') Cargar productos
