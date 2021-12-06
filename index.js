@@ -1,5 +1,6 @@
 const express = require('express');
 const { Router } = express;
+const handlebars = require('express-handlebars');
 const Contenedor = require('./Contenedor.js');
 
 const app = express();
@@ -28,9 +29,16 @@ const contenedor = new Contenedor([
     },
 ]);
 
+app.engine(
+    "handlebars",
+    handlebars.engine()
+)
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 const router = Router();
+app.set('view engine', 'handlebars');
+app.set('views', './views');
 
 const server = app.listen(PORT, () => {
     console.log(`El servidor está corriendo en el puerto ${PORT}`);
@@ -40,7 +48,11 @@ server.on('error', (error) => {
 });
 
 router.get('/', (request, response) => {
-    response.send(contenedor.getAll());
+    const list = contenedor.getAll();
+    const showList = list.length > 0 ? true: false
+    response.render("home", {
+        list: list, showList: showList
+    });
 });
 
 router.get('/:id', (request, response) => {
@@ -57,7 +69,7 @@ router.post('/', (request, response) => {
         price: request.body.price,
         thumbnail: request.body.thumbnail,
     });
-    response.send(`se agregó un producto con el id ${operation}`);
+    response.redirect('/');
 });
 
 router.put('/:id', (request, response) => {
