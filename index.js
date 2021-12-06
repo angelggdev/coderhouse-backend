@@ -29,10 +29,7 @@ const contenedor = new Contenedor([
     },
 ]);
 
-app.engine(
-    "handlebars",
-    handlebars.engine()
-)
+app.engine('handlebars', handlebars.engine());
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -49,9 +46,10 @@ server.on('error', (error) => {
 
 router.get('/', (request, response) => {
     const list = contenedor.getAll();
-    const showList = list.length > 0 ? true: false
-    response.render("home", {
-        list: list, showList: showList
+    const showList = list.length > 0 ? true : false;
+    response.render('home', {
+        list: list,
+        showList: showList,
     });
 });
 
