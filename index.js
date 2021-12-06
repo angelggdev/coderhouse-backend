@@ -6,24 +6,24 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 const contenedor = new Contenedor([
     {
-        title: 'remera',
+        title: 'Medias Homero Simpson',
         price: 1400,
         thumbnail:
-            'https://www.remerasya.com/pub/media/catalog/product/cache/e4d64343b1bc593f1c5348fe05efa4a6/r/e/remera_negra_lisa_1.jpg',
+            'https://http2.mlstatic.com/D_NQ_NP_2X_905550-MLA46376901856_062021-F.webp',
         id: 1,
     },
     {
-        title: 'pantalon',
+        title: 'Manual de monstruos - D&D 5ta Ed.',
         price: 6000,
         thumbnail:
-            'https://d3ugyf2ht6aenh.cloudfront.net/stores/144/702/products/buzo_franco_grismelange-1-copia1-8de0fc1cd56341bcbe15797156441482-480-0.jpg',
+            'https://http2.mlstatic.com/D_NQ_NP_2X_645695-MLA31115125736_062019-F.webp',
         id: 2,
     },
     {
-        title: 'buzo',
+        title: 'Varita Harry Potter',
         price: 4000,
         thumbnail:
-            'https://www.guantexindustrial.com.ar/807-large_default/pantalon-jeans-talle-56.jpg',
+            'https://http2.mlstatic.com/D_NQ_NP_2X_888824-MLA46982682951_082021-F.webp',
         id: 3,
     },
 ]);
@@ -31,6 +31,9 @@ const contenedor = new Contenedor([
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 const router = Router();
+
+app.set('views', './views');
+app.set('view engine', 'pug');
 
 const server = app.listen(PORT, () => {
     console.log(`El servidor está corriendo en el puerto ${PORT}`);
@@ -40,7 +43,9 @@ server.on('error', (error) => {
 });
 
 router.get('/', (request, response) => {
-    response.send(contenedor.getAll());
+    const list = contenedor.getAll();
+    const showList = list.length > 0 ? true: false;
+    response.render('productos.pug', { list: list, showList: showList });
 });
 
 router.get('/:id', (request, response) => {
@@ -57,7 +62,7 @@ router.post('/', (request, response) => {
         price: request.body.price,
         thumbnail: request.body.thumbnail,
     });
-    response.send(`se agregó un producto con el id ${operation}`);
+    response.redirect('/');
 });
 
 router.put('/:id', (request, response) => {

@@ -39,7 +39,7 @@ class Contenedor {
             return this.productList;
         } else {
             console.log('no se han encontrado productos');
-            return 'no se han encontrado productos';
+            return [];
         }
     }
 
