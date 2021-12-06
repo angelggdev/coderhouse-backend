@@ -1,19 +1,21 @@
-{{#if showList}}
-<table>
-    <tr>
-        <th>Nombre del producto</th>
-        <th>Precio</th>
-        <th>Imagen</th>
-    </tr>
-    {{#each list}}
+<div class="container d-flex flex-column justify-content-center" style='height: 100vh; background-color: #CFCFEA'>
+    <a href='/' class='nav-link' style='align-self:flex-end'>Cargar productos</a>
+    {{#if showList}}
+    <table class="table">
         <tr>
-            <td>{{this.title}}</td>
-            <td>{{this.price}}</td>
-            <td><img src={{this.thumbnail}} alt={{this.title}} width='100px'></td>
+            <th>Nombre del producto</th>
+            <th>Precio</th>
+            <th>Imagen</th>
         </tr>
-    {{/each}}
-</table>
-{{else}}
-<h2>No hay productos</h2>
-{{/if}}
-<a href='/'>Cargar productos</a>
+        {{#each list}}
+            <tr>
+                <td>{{this.title}}</td>
+                <td>{{this.price}}</td>
+                <td><img src={{this.thumbnail}} alt={{this.title}} width='100px'></td>
+            </tr>
+        {{/each}}
+    </table>
+    {{else}}
+    <h2>No hay productos</h2>
+    {{/if}}
+</div>
