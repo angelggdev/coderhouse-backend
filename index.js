@@ -57,7 +57,7 @@ router.get('/:id', (request, response) => {
 });
 
 router.post('/', (request, response) => {
-    const operation = contenedor.save({
+    contenedor.save({
         title: request.body.title,
         price: request.body.price,
         thumbnail: request.body.thumbnail,
