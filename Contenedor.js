@@ -17,7 +17,7 @@ class Contenedor {
             console.log(`se actualizó el producto con el id ${object.id}`);
             return object.id;
         } else {
-            this.productList.unshift({ ...object, id: id });
+            this.productList.push({ ...object, id: id });
             console.log(`se agregó un producto con el id ${id}`);
             return id;
         }
