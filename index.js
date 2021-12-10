@@ -62,7 +62,7 @@ router.post('/', (request, response) => {
         price: request.body.price,
         thumbnail: request.body.thumbnail,
     });
-    response.redirect('/');
+    response.redirect('/api/productos');
 });
 
 router.put('/:id', (request, response) => {
