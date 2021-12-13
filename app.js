@@ -1,3 +1,4 @@
+//imports
 const express = require('express');
 const { Router } = express;
 const fs = require('fs');
@@ -5,9 +6,12 @@ const Contenedor = require('./Contenedor.js');
 const { Server: HttpServer } = require('http');
 const { Server: IOServer } = require('socket.io');
 
+//declaracion de servidores
 const app = express();
 const httpServer = new HttpServer(app);
 const io = new IOServer(httpServer);
+
+//declaracion de otras variables
 const PORT = process.env.PORT || 8080;
 const contenedor = new Contenedor([
     {
@@ -32,16 +36,16 @@ const contenedor = new Contenedor([
         id: 3,
     },
 ]);
-
 let messages = [];
-
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
 const router = Router();
 
+//configuración del motor de plantillas
 app.set('views', './views');
 app.set('view engine', 'pug');
 
+//configuración del servidor
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 const server = httpServer.listen(PORT, () => {
     console.log(`El servidor está corriendo en el puerto ${PORT}`);
 });
@@ -49,6 +53,7 @@ server.on('error', (error) => {
     console.log('Hubo un error en el servidor' + error);
 });
 
+//routing
 app.get('/', (req, res) => {
     const list = contenedor.getAll();
     const showList = list.length > 0 ? true : false;
@@ -96,6 +101,7 @@ router.delete('/:id', (request, response) => {
 app.use('/api/productos', router);
 //app.use(express.static('public'));
 
+//Web sockets
 io.on('connection', async (socket) => {
     try {
         messages = JSON.parse(
