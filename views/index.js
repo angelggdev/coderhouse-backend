@@ -8,8 +8,9 @@ function render(data){
     data.forEach((info) => {
         $('#messages').prepend(`
             <div>
-                [${info.time}] <strong>${info.author}</strong>
-                <em>${info.text}</em>
+                <strong style="color:blue">${info.author}</strong>
+                <span style="color:brown">[${info.time}]</span> 
+                <i style="color:green">${info.text}</i>
             </div>
         `)
     })

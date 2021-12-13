@@ -1,5 +1,6 @@
 const express = require('express');
 const { Router } = express;
+const fs = require('fs');
 const Contenedor = require('./Contenedor.js');
 const { Server: HttpServer } = require('http');
 const { Server: IOServer } = require('socket.io');
@@ -32,7 +33,7 @@ const contenedor = new Contenedor([
     },
 ]);
 
-const messages = [];
+let messages = [];
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -50,9 +51,9 @@ server.on('error', (error) => {
 
 app.get('/', (req, res) => {
     const list = contenedor.getAll();
-    const showList = list.length > 0 ? true: false;
+    const showList = list.length > 0 ? true : false;
     res.render('index.pug', { list: list, showList: showList });
-})
+});
 
 /* router.get('/', (request, response) => {
     const list = contenedor.getAll();
@@ -95,14 +96,37 @@ router.delete('/:id', (request, response) => {
 app.use('/api/productos', router);
 //app.use(express.static('public'));
 
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
+    try {
+        messages = JSON.parse(
+            await fs.promises.readFile('messages.txt', 'utf-8')
+        );
+    } catch (err) {
+        console.log(err);
+    }
 
     socket.emit('messages', messages);
 
-    socket.on('new-message', data => {
-        data.time= new Date().toLocaleTimeString();
+    socket.on('new-message', async (data) => {
+        data.time = `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
         messages.push(data);
         io.sockets.emit('messages', [data]);
-    })
-
-})
+        let savedMessages = [];
+        try {
+            savedMessages = JSON.parse(
+                await fs.promises.readFile('messages.txt', 'utf-8')
+            );
+        } catch (err) {
+            console.log(err);
+        }
+        savedMessages.unshift(data);
+        try {
+            fs.promises.writeFile(
+                'messages.txt',
+                JSON.stringify(savedMessages)
+            );
+        } catch (err) {
+            console.log(err);
+        }
+    });
+});
