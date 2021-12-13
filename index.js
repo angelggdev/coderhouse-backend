@@ -42,6 +42,12 @@ server.on('error', (error) => {
     console.log('Hubo un error en el servidor');
 });
 
+app.get('/', (req, res) => {
+    const list = contenedor.getAll();
+    const showList = list.length > 0 ? true: false;
+    res.render('index.pug', { list: list, showList: showList });
+})
+
 router.get('/', (request, response) => {
     const list = contenedor.getAll();
     const showList = list.length > 0 ? true: false;
