@@ -5,15 +5,17 @@ socket.on('messages', data => {
 });
 
 function render(data){
-    data.forEach((info) => {
-        $('#messages').prepend(`
-            <div>
-                <strong style="color:blue">${info.author}</strong>
-                <span style="color:brown">[${info.time}]</span> 
-                <i style="color:green">${info.text}</i>
-            </div>
-        `)
-    })
+    if (data.length > 0){
+        data.forEach((info) => {
+            $('#messages').prepend(`
+                <div>
+                    <strong style="color:blue">${info.author}</strong>
+                    <span style="color:brown">[${info.time}]</span> 
+                    <i style="color:green">${info.text}</i>
+                </div>
+            `)
+        })
+    }
 }
 
 $('#myForm').submit(e => {
@@ -33,3 +35,4 @@ $('#myForm').submit(e => {
     }
 
 });
+

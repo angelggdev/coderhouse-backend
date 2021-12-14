@@ -1,6 +1,7 @@
 //imports
 const express = require('express');
 const { Router } = express;
+const axios = require('axios');
 const fs = require('fs');
 const Contenedor = require('./Contenedor.js');
 const { Server: HttpServer } = require('http');
@@ -60,11 +61,11 @@ app.get('/', (req, res) => {
     res.render('index.pug', { list: list, showList: showList });
 });
 
-/* router.get('/', (request, response) => {
+router.get('/', (request, response) => {
     const list = contenedor.getAll();
     const showList = list.length > 0 ? true: false;
     response.render('productos.pug', { list: list, showList: showList });
-}); */
+}); 
 
 /* router.get('/:id', (request, response) => {
     const id = parseInt(request.params.id);
@@ -80,8 +81,10 @@ router.post('/', (request, response) => {
         price: request.body.price,
         thumbnail: request.body.thumbnail,
     });
-    response.redirect('/api/productos');
-});
+    const list = contenedor.getAll();
+    const showList = list.length > 0 ? true: false;
+    response.render('productos.pug', { list: list, showList: showList });
+}); 
 
 /* router.put('/:id', (request, response) => {
     contenedor.save({
@@ -111,13 +114,39 @@ io.on('connection', async (socket) => {
         console.log(err);
     }
 
-    socket.emit('messages', messages);
+    socket.emit('messages', messages); 
+
+    let products; 
+
+    async function getProducts(){
+    
+        const url = `http://localhost:${PORT}/api/productos`
+        await axios.get(url)
+        .then(res => products = res.data)
+        .catch(err => console.log(err));
+
+    }
+
+    await getProducts();
+
+    socket.emit('products', products); 
+
+    socket.on('new-product', async data => {
+        contenedor.save({
+            title: data.title,
+            price: data.price,
+            thumbnail: data.thumbnail,
+        });
+        await getProducts();
+        io.sockets.emit('products', products); 
+
+    }) 
 
     socket.on('new-message', async (data) => {
         data.time = `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
         messages.push(data);
-        io.sockets.emit('messages', [data]);
         let savedMessages = [];
+        
         try {
             savedMessages = JSON.parse(
                 await fs.promises.readFile('messages.txt', 'utf-8')
@@ -134,5 +163,9 @@ io.on('connection', async (socket) => {
         } catch (err) {
             console.log(err);
         }
+        io.sockets.emit('messages', [data]);
     });
+    
+
 });
+

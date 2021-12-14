@@ -5,23 +5,25 @@ html
     body
         div(class="container d-flex flex-column justify-content-center", style='padding: 60px ;background-color: #CFCFEA; width:90vw;')
             h2(style='text-align:center; margin:30px;') Ingrese un producto
-            form(method="POST", action="/api/productos")
+            form(id='productForm')
                 div.mb-3
                     label(for="title", class="form-label") Nombre del producto
-                    input(type="text", name="title", class="form-control")
+                    input(type="text", id="title", name="title", class="form-control")
                 div.mb-3
                     label(for="price", class='form-label') Precio del producto
-                    input(type="number", name="price", class='form-control') 
+                    input(type="number", id="price", name="price", class='form-control') 
                 div.mb-3
                     label(for="thumbnail", class='form-label') Url de la imagen del producto
-                    input(type="text", name="thumbnail", class='form-control')
-                button(type="submit" class="btn btn-primary") Enviar
-            include productos.pug
+                    input(type="text", id="thumbnail", name="thumbnail", class='form-control')
+                input(type="submit" class="btn btn-primary")
+            div(id="tablaProductos")
             include chat.pug
         script(src="https://code.jquery.com/jquery-3.6.0.js", integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=", crossorigin="anonymous")
         script(src="/socket.io/socket.io.js")
         script  
-            include index.js
+            include chat.js
+        script
+            include productos.js
 
 
      
