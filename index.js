@@ -63,17 +63,17 @@ app.get('/', (req, res) => {
 
 router.get('/', (request, response) => {
     const list = contenedor.getAll();
-    const showList = list.length > 0 ? true: false;
+    const showList = list.length > 0 ? true : false;
     response.render('productos.pug', { list: list, showList: showList });
-}); 
+});
 
-/* router.get('/:id', (request, response) => {
+router.get('/:id', (request, response) => {
     const id = parseInt(request.params.id);
     const item = contenedor.getById(id);
     item
         ? response.send(item)
         : response.send({ error: 'producto no encontrado' });
-}); */
+});
 
 router.post('/', (request, response) => {
     contenedor.save({
@@ -82,11 +82,11 @@ router.post('/', (request, response) => {
         thumbnail: request.body.thumbnail,
     });
     const list = contenedor.getAll();
-    const showList = list.length > 0 ? true: false;
+    const showList = list.length > 0 ? true : false;
     response.render('productos.pug', { list: list, showList: showList });
-}); 
+});
 
-/* router.put('/:id', (request, response) => {
+router.put('/:id', (request, response) => {
     contenedor.save({
         id: parseInt(request.params.id),
         title: request.body.title,
@@ -99,13 +99,13 @@ router.post('/', (request, response) => {
 router.delete('/:id', (request, response) => {
     contenedor.deleteById(parseInt(request.params.id));
     response.send(`producto con id ${request.params.id} eliminado`);
-}); */
+});
 
 app.use('/api/productos', router);
-//app.use(express.static('public'));
 
 //Web sockets
 io.on('connection', async (socket) => {
+    //chat socket
     try {
         messages = JSON.parse(
             await fs.promises.readFile('messages.txt', 'utf-8')
@@ -114,39 +114,13 @@ io.on('connection', async (socket) => {
         console.log(err);
     }
 
-    socket.emit('messages', messages); 
-
-    let products; 
-
-    async function getProducts(){
-    
-        const url = `http://localhost:${PORT}/api/productos`
-        await axios.get(url)
-        .then(res => products = res.data)
-        .catch(err => console.log(err));
-
-    }
-
-    await getProducts();
-
-    socket.emit('products', products); 
-
-    socket.on('new-product', async data => {
-        contenedor.save({
-            title: data.title,
-            price: data.price,
-            thumbnail: data.thumbnail,
-        });
-        await getProducts();
-        io.sockets.emit('products', products); 
-
-    }) 
+    socket.emit('messages', messages);
 
     socket.on('new-message', async (data) => {
         data.time = `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
         messages.push(data);
         let savedMessages = [];
-        
+
         try {
             savedMessages = JSON.parse(
                 await fs.promises.readFile('messages.txt', 'utf-8')
@@ -165,7 +139,30 @@ io.on('connection', async (socket) => {
         }
         io.sockets.emit('messages', [data]);
     });
-    
 
+    //products socket
+
+    let products;
+
+    async function getProducts() {
+        const url = `http://localhost:${PORT}/api/productos`;
+        await axios
+            .get(url)
+            .then((res) => (products = res.data))
+            .catch((err) => console.log(err));
+    }
+
+    await getProducts();
+
+    socket.emit('products', products);
+
+    socket.on('new-product', async (data) => {
+        contenedor.save({
+            title: data.title,
+            price: data.price,
+            thumbnail: data.thumbnail,
+        });
+        await getProducts();
+        io.sockets.emit('products', products);
+    });
 });
-
