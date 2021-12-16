@@ -5,6 +5,7 @@ const Contenedor = require('./Contenedor.js');
 const app = express();
 const PORT = process.env.PORT || 8080;
 const contenedor = new Contenedor('productos.txt');
+const isAdmin = true;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -17,8 +18,9 @@ server.on('error', (error) => {
     console.log('Hubo un error en el servidor');
 });
 
-router.get('/', (request, response) => {
-    response.send(contenedor.getAll());
+router.get('/', async(request, response) => {
+    const products = await contenedor.getAll();
+    response.send(products);
 });
 
 router.get('/:id', (request, response) => {
@@ -30,27 +32,39 @@ router.get('/:id', (request, response) => {
 });
 
 router.post('/', (request, response) => {
-    const operation = contenedor.save({
-        title: request.body.title,
-        price: request.body.price,
-        thumbnail: request.body.thumbnail,
-    });
-    response.send(`se agregó un producto con el id ${operation}`);
+    if(isAdmin){
+        const operation = contenedor.save({
+            title: request.body.title,
+            price: request.body.price,
+            thumbnail: request.body.thumbnail,
+        });
+        response.send(`se agregó un producto con el id ${operation}`);
+    } else {
+        response.send('No tiene permisos para realizar esta acción');
+    }
 });
 
 router.put('/:id', (request, response) => {
-    contenedor.save({
-        id: parseInt(request.params.id),
-        title: request.body.title,
-        price: request.body.price,
-        thumbnail: request.body.thumbnail,
-    });
-    response.send(`se actualizó un producto con el id ${request.params.id}`);
+    if (isAdmin){
+        contenedor.save({
+            id: parseInt(request.params.id),
+            title: request.body.title,
+            price: request.body.price,
+            thumbnail: request.body.thumbnail,
+        });
+        response.send(`se actualizó un producto con el id ${request.params.id}`);
+    } else {
+        response.send('No tiene permisos para realizar esta acción');
+    }
 });
 
 router.delete('/:id', (request, response) => {
-    contenedor.deleteById(parseInt(request.params.id));
-    response.send(`producto con id ${request.params.id} eliminado`);
+    if(isAdmin){
+        contenedor.deleteById(parseInt(request.params.id));
+        response.send(`producto con id ${request.params.id} eliminado`);
+    } else {
+        response.send('No tiene permisos para realizar esta acción');
+    }
 });
 
 app.use('/api/productos', router);

@@ -48,6 +48,7 @@ class Contenedor {
             const objects = JSON.parse(
                 await fs.promises.readFile(this.fileName, 'utf-8')
             );
+            console.log(objects)
             if (objects.length > 0) {
                 console.log('lista de productos:', objects);
                 return objects;
@@ -55,7 +56,8 @@ class Contenedor {
                 console.log('no se han encontrado productos');
                 return 'no se han encontrado productos';
             }
-        } catch {
+        } catch (err) {
+            console.log(err)
             console.log('no se han encontrado productos');
             return 'no se han encontrado productos';
         }
