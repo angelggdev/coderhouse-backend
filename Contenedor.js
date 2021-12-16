@@ -1,30 +1,39 @@
+const fs = require('fs');
+
 class Contenedor {
-    constructor(productList) {
-        this.productList = productList;
+    constructor(fileName) {
+        this.fileName = fileName;
     }
 
-    save(object) {
-        const id =
-            this.productList.length === 0
-                ? 1
-                : this.productList[this.productList.length - 1].id + 1;
-        if (object.id) {
-            let objectIndex;
-            this.productList.forEach(
-                (x, i) => x.id === object.id && (objectIndex = i)
+    async save(object) {
+        let objects = [];
+        try {
+            objects = JSON.parse(
+                await fs.promises.readFile(this.fileName, 'utf-8')
             );
-            this.productList[objectIndex] = object;
-            console.log(`se actualizó el producto con el id ${object.id}`);
-            return object.id;
-        } else {
-            this.productList.push({ ...object, id: id });
-            console.log(`se agregó un producto con el id ${id}`);
-            return id;
+        } catch (err) {
+            console.log(err);
         }
+        const id = objects.length === 0 ? 1 : objects[objects.length - 1].id + 1;
+        objects.push({ ...object, id });
+        try {
+            await fs.promises.writeFile(this.fileName, JSON.stringify(objects));
+        } catch (err) {
+            console.log(err);
+        }
+        console.log(`se agregó un producto con el id ${id}`);
+        return id;
     }
 
-    getById(number) {
-        const object = this.productList.filter((x) => x.id === number)[0];
+    async getById(number) {
+        let object;
+        try {
+            object = JSON.parse(
+                await fs.promises.readFile(this.fileName, 'utf-8')
+            ).filter((x) => x.id === number)[0];
+        } catch (err) {
+            console.log(err);
+        }
         if (object) {
             console.log('producto con id 2: \n', object);
             return object;
@@ -34,22 +43,43 @@ class Contenedor {
         }
     }
 
-    getAll() {
-        if (this.productList.length > 0) {
-            return this.productList;
-        } else {
+    async getAll() {
+        try {
+            const objects = JSON.parse(
+                await fs.promises.readFile(this.fileName, 'utf-8')
+            );
+            if (objects.length > 0) {
+                console.log('lista de productos:', objects);
+                return objects;
+            } else {
+                console.log('no se han encontrado productos');
+                return 'no se han encontrado productos';
+            }
+        } catch {
             console.log('no se han encontrado productos');
             return 'no se han encontrado productos';
         }
     }
 
-    deleteById(number) {
-        this.productList = this.productList.filter((x) => x.id !== number);
-        console.log(`producto con id ${number} eliminado`);
+    async deleteById(number) {
+        try {
+            const objects = JSON.parse(
+                await fs.promises.readFile(this.fileName, 'utf-8')
+            ).filter((x) => x.id !== number);
+            await fs.promises.writeFile(this.fileName, JSON.stringify(objects));
+            console.log(`producto con id ${number} eliminado`);
+        } catch (err) {
+            console.log(err);
+        }
     }
 
-    deleteAll() {
-        this.productList = [];
+    async deleteAll() {
+        try {
+            await fs.promises.writeFile(this.fileName, JSON.stringify([]));
+            console.log('se han eliminado todos los productos');
+        } catch (err) {
+            console.log(err);
+        }
     }
 }
 
