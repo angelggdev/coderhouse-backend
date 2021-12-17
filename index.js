@@ -18,22 +18,22 @@ server.on('error', (error) => {
     console.log('Hubo un error en el servidor');
 });
 
-router.get('/', async(request, response) => {
+router.get('/', async (request, response) => {
     const products = await contenedor.getAll();
     response.send(products);
 });
 
-router.get('/:id', (request, response) => {
+router.get('/:id', async (request, response) => {
     const id = parseInt(request.params.id);
-    const item = contenedor.getById(id);
+    const item = await contenedor.getById(id);
     item
         ? response.send(item)
         : response.send({ error: 'producto no encontrado' });
 });
 
-router.post('/', (request, response) => {
+router.post('/', async (request, response) => {
     if(isAdmin){
-        const operation = contenedor.save({
+        const operation = await contenedor.save({
             title: request.body.title,
             price: request.body.price,
             thumbnail: request.body.thumbnail,
@@ -44,9 +44,9 @@ router.post('/', (request, response) => {
     }
 });
 
-router.put('/:id', (request, response) => {
+router.put('/:id', async (request, response) => {
     if (isAdmin){
-        contenedor.save({
+        await contenedor.save({
             id: parseInt(request.params.id),
             title: request.body.title,
             price: request.body.price,
@@ -58,9 +58,9 @@ router.put('/:id', (request, response) => {
     }
 });
 
-router.delete('/:id', (request, response) => {
+router.delete('/:id', async (request, response) => {
     if(isAdmin){
-        contenedor.deleteById(parseInt(request.params.id));
+        await contenedor.deleteById(parseInt(request.params.id));
         response.send(`producto con id ${request.params.id} eliminado`);
     } else {
         response.send('No tiene permisos para realizar esta acción');
