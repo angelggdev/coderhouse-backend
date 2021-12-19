@@ -14,15 +14,34 @@ class Contenedor {
         } catch (err) {
             console.log(err);
         }
-        const id = objects.length === 0 ? 1 : objects[objects.length - 1].id + 1;
-        objects.push({ ...object, id });
-        try {
-            await fs.promises.writeFile(this.fileName, JSON.stringify(objects));
-        } catch (err) {
-            console.log(err);
+        if(!object.id){
+            const id = objects.length === 0 ? 1 : objects[objects.length - 1].id + 1;
+            objects.push({ ...object, id });
+            try {
+                await fs.promises.writeFile(this.fileName, JSON.stringify(objects));
+            } catch (err) {
+                console.log(err);
+            }
+            return (`se agregó un producto con el id ${id}`);
+        } else {
+            let objectIndex;
+            objects.forEach(
+                (x, i) => x.id === object.id && (objectIndex = i)
+            );
+            if(objectIndex){
+                objects[objectIndex] = {
+                    ...object
+                }
+                try {
+                    await fs.promises.writeFile(this.fileName, JSON.stringify(objects));
+                } catch (err) {
+                    console.log(err);
+                }
+                return (`se actualizó el producto con el id ${object.id}`);
+            } else {
+                return (`no se encontró un producto con el id ${object.id}`);
+            }
         }
-        console.log(`se agregó un producto con el id ${id}`);
-        return id;
     }
 
     async getById(number) {

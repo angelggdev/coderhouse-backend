@@ -38,7 +38,7 @@ router.post('/', async (request, response) => {
             price: request.body.price,
             thumbnail: request.body.thumbnail,
         });
-        response.send(`se agregó un producto con el id ${operation}`);
+        response.send(operation);
     } else {
         response.send('No tiene permisos para realizar esta acción');
     }
@@ -46,13 +46,13 @@ router.post('/', async (request, response) => {
 
 router.put('/:id', async (request, response) => {
     if (isAdmin){
-        await contenedor.save({
+        const operation = await contenedor.save({
             id: parseInt(request.params.id),
             title: request.body.title,
             price: request.body.price,
             thumbnail: request.body.thumbnail,
         });
-        response.send(`se actualizó un producto con el id ${request.params.id}`);
+        response.send(operation);
     } else {
         response.send('No tiene permisos para realizar esta acción');
     }
