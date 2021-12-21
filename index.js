@@ -16,70 +16,66 @@ const cartRouter = Router();
 //api configuration
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-//server initialization
-const server = app.listen(PORT, () => {
-    console.log(`El servidor está corriendo en el puerto ${PORT}`);
-});
-server.on('error', (error) => {
-    console.log('Hubo un error en el servidor', error);
-});
+app.use(express.static('public'));
 
 //routing
 
 //route api/productos
-router.get('/', async (request, response) => {
+router.get('/', async (req, res) => {
     const products = await container.getAll();
-    response.send(products);
+    res.send(products);
 });
 
-router.get('/:id', async (request, response) => {
-    const id = parseInt(request.params.id);
+router.get('/:id', async (req, res) => {
+    const id = parseInt(req.params.id);
     const item = await container.getById(id);
     item
-        ? response.send(item)
-        : response.send({ error: 'producto no encontrado' });
+        ? res.send(item)
+        : res.send({ error: 'producto no encontrado' });
 });
 
-router.post('/', async (request, response) => {
+router.post('/', async (req, res) => {
     if (isAdmin) {
         const operation = await container.save({
-            title: request.body.title,
-            price: request.body.price,
-            thumbnail: request.body.thumbnail,
+            title: req.body.title,
+            price: req.body.price,
+            thumbnail: req.body.thumbnail,
+            description: req.body.description,
+            stock: req.body.stock,
+            timestamp: Date.now()
         });
-        response.send(operation);
+        res.send(operation);
     } else {
-        response.send({
+        res.send({
             error: -1,
             descripcion: "ruta '/' método 'post' no autorizado",
         });
     }
 });
 
-router.put('/:id', async (request, response) => {
+router.put('/:id', async (req, res) => {
     if (isAdmin) {
         const operation = await container.save({
-            id: parseInt(request.params.id),
-            title: request.body.title,
-            price: request.body.price,
-            thumbnail: request.body.thumbnail,
+            id: parseInt(req.params.id),
+            title: req.body.title,
+            price: req.body.price,
+            thumbnail: req.body.thumbnail,
         });
-        response.send(operation);
+        res.send(operation);
     } else {
-        response.send({
+        res.send({
             error: -1,
             descripcion: "ruta '/:id' método 'put' no autorizado",
         });
     }
 });
 
-router.delete('/:id', async (request, response) => {
+router.delete('/:id', async (req, res) => {
     if (isAdmin) {
-        await container.deleteById(parseInt(request.params.id));
-        response.send(`producto con id ${request.params.id} eliminado`);
+        await container.deleteById(parseInt(req.params.id));
+        res.send(`producto con id ${req.params.id} eliminado`);
     } else {
-        response.send({
+        res.send({
             error: -1,
             descripcion: "ruta '/:id' método 'delete' no autorizado",
         });
@@ -89,39 +85,39 @@ router.delete('/:id', async (request, response) => {
 /////////////////////////////////////////
 
 //route api/carrito
-cartRouter.post('/', async (request, response) => {
+cartRouter.post('/', async (req, res) => {
     const operation = await cart.createCart();
-    response.send(`se ha creado un carrito con el id ${operation}`);
+    res.send(`se ha creado un carrito con el id ${operation}`);
 });
 
-cartRouter.delete('/:id', async (request, response) => {
-    const id = parseInt(request.params.id);
+cartRouter.delete('/:id', async (req, res) => {
+    const id = parseInt(req.params.id);
     await cart
         .deleteCart(id)
         .then((res) =>
-            response.send(`se ha eliminado el carrito con el id ${id}`)
+            res.send(`se ha eliminado el carrito con el id ${id}`)
         );
 });
 
-cartRouter.get('/:id/productos', async (request, response) => {
-    response.send(await cart.getProducts(parseInt(request.params.id)));
+cartRouter.get('/:id/productos', async (req, res) => {
+    res.send(await cart.getProducts(parseInt(req.params.id)));
 });
 
-cartRouter.post('/:id/productos', async (request, response) => {
-    const cartId = parseInt(request.params.id);
-    const productId = parseInt(request.body.productId);
-    const quantity = request.body.quantity;
+cartRouter.post('/:id/productos', async (req, res) => {
+    const cartId = parseInt(req.params.id);
+    const productId = parseInt(req.body.productId);
+    const quantity = req.body.quantity;
     await cart.addProduct(cartId, productId, quantity);
-    response.send(
+    res.send(
         `se agregó el producto con id ${productId} al carrito con id ${cartId}`
     );
 });
 
-cartRouter.delete('/:id/productos/:id_prod', async (request, response) => {
-    const cartId = parseInt(request.params.id);
-    const productId = parseInt(request.params.id_prod);
+cartRouter.delete('/:id/productos/:id_prod', async (req, res) => {
+    const cartId = parseInt(req.params.id);
+    const productId = parseInt(req.params.id_prod);
     await cart.deleteProduct(cartId, productId);
-    response.send(
+    res.send(
         `se eliminó el producto con id ${productId} del carrito con id ${cartId}`
     );
 });
@@ -129,4 +125,20 @@ cartRouter.delete('/:id/productos/:id_prod', async (request, response) => {
 //api configuration
 app.use('/api/productos', router);
 app.use('/api/carrito', cartRouter);
-app.use(express.static('public'));
+
+//route 404
+app.get('*', (req, res) => {
+    const requestedRoute = req.path;
+    const requestedMethod = req.method;
+    res.send({error: -2, descripcion:`ruta ${requestedRoute} método ${requestedMethod} no imlepementada`})
+})
+
+//server initialization
+const server = app.listen(PORT, () => {
+    console.log(`El servidor está corriendo en el puerto ${PORT}`);
+});
+server.on('error', (error) => {
+    console.log('Hubo un error en el servidor', error);
+});
+
+

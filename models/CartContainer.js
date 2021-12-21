@@ -29,7 +29,11 @@ class CartContainer {
     async createCart() {
         let carts = await this.readFile();
         const id = carts.length === 0 ? 1 : carts[carts.length - 1].id + 1;
-        let newCart = { id: id, products: [] };
+        let newCart = { 
+            id: id,
+            timestamp: Date.now(),
+            products: [] 
+        };
         carts.push(newCart);
         await this.writeFile(carts);
         return id;
