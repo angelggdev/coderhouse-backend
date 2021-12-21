@@ -1,29 +1,12 @@
-import fs from 'fs';
-import Container from './Container';
+import ProductContainer from './ProductContainer';
+import FileSystem from './FileSystem';
 
-const container = new Container('./txt/productos.txt');
+const container = new ProductContainer();
 
-export default class CartContainer {
-    fileName = './txt/carrito.txt';
+export default class CartContainer extends FileSystem {
 
-    async readFile() {
-        let object = [];
-        try {
-            object = JSON.parse(
-                await fs.promises.readFile(this.fileName, 'utf-8')
-            );
-        } catch (err) {
-            console.log(err);
-        }
-        return object;
-    }
-
-    async writeFile(object) {
-        try {
-            await fs.promises.writeFile(this.fileName, JSON.stringify(object));
-        } catch (err) {
-            console.log(err);
-        }
+    constructor(){
+        super('./txt/carrito.txt');
     }
 
     async createCart() {

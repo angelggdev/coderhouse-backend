@@ -1,13 +1,13 @@
 //imports
 import express from 'express';
 import { Router } from 'express';
-import Container from '../models/Container';
+import ProductContainer from '../models/ProductContainer';
 import CartContainer from '../models/CartContainer';
 
 //variables
 const app = express();
 const PORT = process.env.PORT || 8080;
-const container = new Container('./txt/productos.txt');
+const productContainer = new ProductContainer();
 const cart = new CartContainer();
 const isAdmin = true;
 const router = Router();
@@ -22,19 +22,19 @@ app.use(express.static('public'));
 
 //route api/productos
 router.get('/', async (req, res) => {
-    const products = await container.getAll();
+    const products = await productContainer.getAll();
     res.send(products);
 });
 
 router.get('/:id', async (req, res) => {
     const id = parseInt(req.params.id);
-    const item = await container.getById(id);
+    const item = await productContainer.getById(id);
     item ? res.send(item) : res.send({ error: 'producto no encontrado' });
 });
 
 router.post('/', async (req, res) => {
     if (isAdmin) {
-        const operation = await container.save({
+        const operation = await productContainer.save({
             title: req.body.title,
             price: req.body.price,
             thumbnail: req.body.thumbnail,
@@ -53,7 +53,7 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
     if (isAdmin) {
-        const operation = await container.save({
+        const operation = await productContainer.save({
             id: parseInt(req.params.id),
             title: req.body.title,
             price: req.body.price,
@@ -70,7 +70,7 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
     if (isAdmin) {
-        await container.deleteById(parseInt(req.params.id));
+        await productContainer.deleteById(parseInt(req.params.id));
         res.send(`producto con id ${req.params.id} eliminado`);
     } else {
         res.send({
