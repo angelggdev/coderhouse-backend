@@ -1,8 +1,8 @@
 //imports
-const express = require('express');
-const { Router } = express;
-const Container = require('./models/Container.js');
-const CartContainer = require('./models/CartContainer');
+import express from 'express';
+import { Router } from 'express';
+import Container from '../models/Container';
+import CartContainer from '../models/CartContainer';
 
 //variables
 const app = express();
@@ -90,7 +90,7 @@ cartRouter.delete('/:id', async (req, res) => {
     const id = parseInt(req.params.id);
     await cart
         .deleteCart(id)
-        .then((res) => res.send(`se ha eliminado el carrito con el id ${id}`));
+        .then(() => res.send(`se ha eliminado el carrito con el id ${id}`));
 });
 
 cartRouter.get('/:id/productos', async (req, res) => {

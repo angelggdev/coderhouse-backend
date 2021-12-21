@@ -1,9 +1,9 @@
-const fs = require('fs');
-const Container = require('./Container');
+import fs from 'fs';
+import Container from './Container';
 
 const container = new Container('./txt/productos.txt');
 
-class CartContainer {
+export default class CartContainer {
     fileName = './txt/carrito.txt';
 
     async readFile() {
@@ -27,7 +27,7 @@ class CartContainer {
     }
 
     async createCart() {
-        let carts = await this.readFile();
+        let carts:any = await this.readFile();
         const id = carts.length === 0 ? 1 : carts[carts.length - 1].id + 1;
         let newCart = { 
             id: id,
@@ -40,19 +40,19 @@ class CartContainer {
     }
 
     async deleteCart(id) {
-        let carts = await this.readFile();
+        let carts:any = await this.readFile();
         carts = carts.filter((x) => x.id !== id);
         await this.writeFile(carts);
     }
 
     async getProducts(id) {
-        let cart = await this.readFile();
+        let cart:any = await this.readFile();
         cart = cart.filter((x) => x.id === id)[0];
         return cart.products;
     }
 
     async addProduct(id, productId, quantity) {
-        let carts = await this.readFile();
+        let carts:any = await this.readFile();
         let cartIndex;
         carts.forEach((x, i) => {
             if (x.id === id) {
@@ -83,7 +83,7 @@ class CartContainer {
     }
 
     async deleteProduct(id, productId) {
-        let carts = await this.readFile();
+        let carts:any = await this.readFile();
         let cartIndex;
         carts.forEach((x, i) => {
             if (x.id === id) {
@@ -108,5 +108,3 @@ class CartContainer {
         }
     }
 }
-
-module.exports = CartContainer;

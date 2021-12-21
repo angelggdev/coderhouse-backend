@@ -1,6 +1,8 @@
-const fs = require('fs');
+import fs from 'fs';
 
-class Container {
+export default class Container {
+
+    fileName:any;
     constructor(fileName) {
         this.fileName = fileName;
     }
@@ -26,7 +28,7 @@ class Container {
     }
 
     async save(object) {
-        let objects = await this.readFile();
+        let objects:any = await this.readFile();
         if (!object.id) {
             const id =
                 objects.length === 0 ? 1 : objects[objects.length - 1].id + 1;
@@ -49,7 +51,7 @@ class Container {
     }
 
     async getById(number) {
-        let object = await this.readFile();
+        let object:any = await this.readFile();
         object = object.filter((x) => x.id === number)[0];
         if (object) {
             return object;
@@ -68,10 +70,8 @@ class Container {
     }
 
     async deleteById(number) {
-        let objects = await this.readFile();
+        let objects:any = await this.readFile();
         objects = objects.filter((x) => x.id !== number);
         await this.writeFile(objects);
     }
 }
-
-module.exports = Container;
