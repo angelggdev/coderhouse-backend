@@ -58,6 +58,8 @@ router.put('/:id', async (req, res) => {
             title: req.body.title,
             price: req.body.price,
             thumbnail: req.body.thumbnail,
+            description: req.body.description,
+            stock: req.body.stock
         });
         res.send(operation);
     } else {

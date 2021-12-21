@@ -1,4 +1,6 @@
 import fs from 'fs';
+import { Cart } from './Cart';
+import { Product } from './Product';
 
 export default class FileSystem {
     
@@ -8,7 +10,7 @@ export default class FileSystem {
         this.fileName = fileName;
     }
 
-    async readFile() {
+    async readFile(): Promise<Array<Cart>|Array<Product>|Array<void>>{
         let object = [];
         try {
             object = JSON.parse(
@@ -20,7 +22,7 @@ export default class FileSystem {
         return object;
     }
 
-    async writeFile(object) {
+    async writeFile(object: Array<Cart>|Array<Cart>|Array<void>): Promise<void> {
         try {
             await fs.promises.writeFile(this.fileName, JSON.stringify(object));
         } catch (err) {

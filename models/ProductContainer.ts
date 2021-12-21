@@ -1,5 +1,5 @@
-import fs from 'fs';
 import FileSystem from './FileSystem';
+import { Product } from './Product';
 
 export default class ProductContainer extends FileSystem{
 
@@ -7,7 +7,7 @@ export default class ProductContainer extends FileSystem{
         super('./txt/productos.txt')
     }
 
-    async save(object) {
+    async save(object: Product): Promise<string> {
         let objects:any = await this.readFile();
         if (!object.id) {
             const id =
@@ -16,8 +16,8 @@ export default class ProductContainer extends FileSystem{
             await this.writeFile(objects);
             return `se agregó un producto con el id ${id}`;
         } else {
-            let objectIndex;
-            objects.forEach((x, i) => x.id === object.id && (objectIndex = i));
+            let objectIndex: number | undefined;
+            objects.forEach((x: Product, i: number) => x.id === object.id && (objectIndex = i));
             if (objectIndex) {
                 Object.assign(objects[objectIndex], object);
                 await this.writeFile(objects);
@@ -28,9 +28,9 @@ export default class ProductContainer extends FileSystem{
         }
     }
 
-    async getById(number) {
+    async getById(number: number): Promise<Product | null> {
         let object:any = await this.readFile();
-        object = object.filter((x) => x.id === number)[0];
+        object = object.filter((x:Product) => x.id === number)[0];
         if (object) {
             return object;
         } else {
@@ -38,8 +38,8 @@ export default class ProductContainer extends FileSystem{
         }
     }
 
-    async getAll() {
-        const objects = await this.readFile();
+    async getAll(): Promise<Product|string> {
+        const objects: any = await this.readFile();
         if (objects.length > 0) {
             return objects;
         } else {
@@ -47,9 +47,9 @@ export default class ProductContainer extends FileSystem{
         }
     }
 
-    async deleteById(number) {
+    async deleteById(number: number): Promise<void> {
         let objects:any = await this.readFile();
-        objects = objects.filter((x) => x.id !== number);
+        objects = objects.filter((x:Product) => x.id !== number);
         await this.writeFile(objects);
     }
 }
