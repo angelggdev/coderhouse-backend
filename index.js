@@ -29,9 +29,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
     const id = parseInt(req.params.id);
     const item = await container.getById(id);
-    item
-        ? res.send(item)
-        : res.send({ error: 'producto no encontrado' });
+    item ? res.send(item) : res.send({ error: 'producto no encontrado' });
 });
 
 router.post('/', async (req, res) => {
@@ -42,7 +40,7 @@ router.post('/', async (req, res) => {
             thumbnail: req.body.thumbnail,
             description: req.body.description,
             stock: req.body.stock,
-            timestamp: Date.now()
+            timestamp: Date.now(),
         });
         res.send(operation);
     } else {
@@ -82,8 +80,6 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-/////////////////////////////////////////
-
 //route api/carrito
 cartRouter.post('/', async (req, res) => {
     const operation = await cart.createCart();
@@ -94,9 +90,7 @@ cartRouter.delete('/:id', async (req, res) => {
     const id = parseInt(req.params.id);
     await cart
         .deleteCart(id)
-        .then((res) =>
-            res.send(`se ha eliminado el carrito con el id ${id}`)
-        );
+        .then((res) => res.send(`se ha eliminado el carrito con el id ${id}`));
 });
 
 cartRouter.get('/:id/productos', async (req, res) => {
@@ -130,8 +124,11 @@ app.use('/api/carrito', cartRouter);
 app.get('*', (req, res) => {
     const requestedRoute = req.path;
     const requestedMethod = req.method;
-    res.send({error: -2, descripcion:`ruta ${requestedRoute} método ${requestedMethod} no imlepementada`})
-})
+    res.send({
+        error: -2,
+        descripcion: `ruta ${requestedRoute} método ${requestedMethod} no imlepementada`,
+    });
+});
 
 //server initialization
 const server = app.listen(PORT, () => {
@@ -140,5 +137,3 @@ const server = app.listen(PORT, () => {
 server.on('error', (error) => {
     console.log('Hubo un error en el servidor', error);
 });
-
-
