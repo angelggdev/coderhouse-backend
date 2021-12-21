@@ -1,13 +1,13 @@
 //imports
 const express = require('express');
 const { Router } = express;
-const Contenedor = require('./models/Contenedor.js');
+const Container = require('./models/Container.js');
 const CartContainer = require('./models/CartContainer');
 
 //variables
 const app = express();
 const PORT = process.env.PORT || 8080;
-const contenedor = new Contenedor('./txt/productos.txt');
+const container = new Container('./txt/productos.txt');
 const cart = new CartContainer();
 const isAdmin = true;
 const router = Router();
@@ -22,20 +22,20 @@ const server = app.listen(PORT, () => {
     console.log(`El servidor está corriendo en el puerto ${PORT}`);
 });
 server.on('error', (error) => {
-    console.log('Hubo un error en el servidor');
+    console.log('Hubo un error en el servidor', error);
 });
 
 //routing
 
 //route api/productos
 router.get('/', async (request, response) => {
-    const products = await contenedor.getAll();
+    const products = await container.getAll();
     response.send(products);
 });
 
 router.get('/:id', async (request, response) => {
     const id = parseInt(request.params.id);
-    const item = await contenedor.getById(id);
+    const item = await container.getById(id);
     item
         ? response.send(item)
         : response.send({ error: 'producto no encontrado' });
@@ -43,7 +43,7 @@ router.get('/:id', async (request, response) => {
 
 router.post('/', async (request, response) => {
     if(isAdmin){
-        const operation = await contenedor.save({
+        const operation = await container.save({
             title: request.body.title,
             price: request.body.price,
             thumbnail: request.body.thumbnail,
@@ -56,7 +56,7 @@ router.post('/', async (request, response) => {
 
 router.put('/:id', async (request, response) => {
     if (isAdmin){
-        const operation = await contenedor.save({
+        const operation = await container.save({
             id: parseInt(request.params.id),
             title: request.body.title,
             price: request.body.price,
@@ -70,7 +70,7 @@ router.put('/:id', async (request, response) => {
 
 router.delete('/:id', async (request, response) => {
     if(isAdmin){
-        await contenedor.deleteById(parseInt(request.params.id));
+        await container.deleteById(parseInt(request.params.id));
         response.send(`producto con id ${request.params.id} eliminado`);
     } else {
         response.send('No tiene permisos para realizar esta acción');
@@ -93,6 +93,14 @@ cartRouter.delete('/:id', async (request, response) => {
 
 cartRouter.get('/:id/productos', async (request, response) => {
     response.send(await cart.getProducts(parseInt(request.params.id)));
+});
+
+cartRouter.post('/:id/productos', async (request, response) => {
+    const cartId = parseInt(request.params.id);
+    const productId = parseInt(request.body.productId);
+    const quantity = request.body.quantity;
+    await cart.addProduct(cartId, productId, quantity);
+    response.send(`se agregó el producto con id ${productId} al carrito con id ${cartId}`);
 })
 
 

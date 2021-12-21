@@ -1,4 +1,7 @@
 const fs = require('fs');
+const Container = require('./Container');
+
+const container = new Container('./txt/productos.txt');
 
 class CartContainer {
 
@@ -45,6 +48,54 @@ class CartContainer {
         } catch (err) {
             console.log(err);
         }
+    }
+
+    async addProduct(id, productId, quantity){
+        let carts;
+        try {
+            carts = JSON.parse(
+                await fs.promises.readFile(this.fileName, 'utf-8')
+            )
+        } catch (err) {
+            console.log(err);
+        }
+        let cartIndex;
+        carts.forEach((x, i) => {
+            if(x.id === id){
+                cartIndex = i;
+            }
+        })
+        let productIndex;
+        carts[cartIndex].products.forEach((x, i) => {
+            if(x.id === productId) {
+                productIndex = i;
+            }
+        });
+        console.log(productIndex)
+        if (productIndex) {
+            carts[cartIndex].products[productIndex] = {
+                ...carts[cartIndex].products[productIndex],
+                quantity : carts[cartIndex].products[productIndex].quantity + quantity
+            }
+            console.log(carts[cartIndex].products[productIndex])
+        } else {
+            let product;
+            try{
+                product = await container.getById(productId);
+            } catch (err) {
+                console.log(err);
+            }
+            carts[cartIndex].products.push({
+                ...product,
+                quantity
+            });
+        }
+        try {
+            await fs.promises.writeFile(this.fileName, JSON.stringify(carts));
+        } catch (err) {
+            console.log(err);
+        }  
+
     }
 
 }

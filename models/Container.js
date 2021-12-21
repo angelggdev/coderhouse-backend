@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-class Contenedor {
+class Container {
     constructor(fileName) {
         this.fileName = fileName;
     }
@@ -104,4 +104,4 @@ class Contenedor {
     }
 }
 
-module.exports = Contenedor;
+module.exports = Container;
