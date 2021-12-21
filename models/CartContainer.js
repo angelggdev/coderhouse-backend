@@ -4,70 +4,60 @@ const Container = require('./Container');
 const container = new Container('./txt/productos.txt');
 
 class CartContainer {
-
     fileName = './txt/carrito.txt';
 
-    async createCart(){
-        let carts = [];
+    async readFile() {
+        let object = [];
         try {
-            carts = JSON.parse(
+            object = JSON.parse(
                 await fs.promises.readFile(this.fileName, 'utf-8')
             );
         } catch (err) {
             console.log(err);
         }
+        return object;
+    }
+
+    async writeFile(object) {
+        try {
+            await fs.promises.writeFile(this.fileName, JSON.stringify(object));
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    async createCart() {
+        let carts = await this.readFile();
         const id = carts.length === 0 ? 1 : carts[carts.length - 1].id + 1;
-        let newCart = {id: id, products: []};
+        let newCart = { id: id, products: [] };
         carts.push(newCart);
-        try {
-            await fs.promises.writeFile(this.fileName, JSON.stringify(carts));
-            return id;
-        } catch (err) {
-            console.log(err);
-        }
+        await this.writeFile(carts);
+        return id;
     }
 
-    async deleteCart(id){
-        try {
-            const carts = JSON.parse(
-                await fs.promises.readFile(this.fileName, 'utf-8')
-            ).filter((x) => x.id !== id);
-            await fs.promises.writeFile(this.fileName, JSON.stringify(carts));
-            console.log(`producto con id ${id} eliminado`);
-        } catch (err) {
-            console.log(err);
-        }
+    async deleteCart(id) {
+        let carts = await this.readFile();
+        carts = carts.filter((x) => x.id !== id);
+        await this.writeFile(carts);
     }
 
-    async getProducts(id){
-        try {
-            const cart = JSON.parse(
-                await fs.promises.readFile(this.fileName, 'utf-8')
-            ).filter(x => x.id === id)[0];
-            return cart.products;
-        } catch (err) {
-            console.log(err);
-        }
+    async getProducts(id) {
+        let cart = await this.readFile();
+        cart = cart.filter((x) => x.id === id)[0];
+        return cart.products;
     }
 
-    async addProduct(id, productId, quantity){
-        let carts;
-        try {
-            carts = JSON.parse(
-                await fs.promises.readFile(this.fileName, 'utf-8')
-            )
-        } catch (err) {
-            console.log(err);
-        }
+    async addProduct(id, productId, quantity) {
+        let carts = await this.readFile();
         let cartIndex;
         carts.forEach((x, i) => {
-            if(x.id === id){
+            if (x.id === id) {
                 cartIndex = i;
             }
-        })
+        });
         let productIndex;
         carts[cartIndex].products.forEach((x, i) => {
-            if(x.id === productId) {
+            if (x.id === productId) {
                 productIndex = i;
             }
         });
@@ -75,58 +65,44 @@ class CartContainer {
             carts[cartIndex].products[productIndex].quantity += quantity;
         } else {
             let product;
-            try{
+            try {
                 product = await container.getById(productId);
             } catch (err) {
                 console.log(err);
             }
             carts[cartIndex].products.push({
                 ...product,
-                quantity
+                quantity,
             });
         }
-        try {
-            await fs.promises.writeFile(this.fileName, JSON.stringify(carts));
-        } catch (err) {
-            console.log(err);
-        }  
-
+        this.writeFile(carts);
     }
 
-    async deleteProduct(id, productId){
-        let carts;
-        try {
-            carts = JSON.parse(
-                await fs.promises.readFile(this.fileName, 'utf-8')
-            )
-        } catch (err) {
-            console.log(err);
-        }
+    async deleteProduct(id, productId) {
+        let carts = await this.readFile();
         let cartIndex;
         carts.forEach((x, i) => {
-            if(x.id === id){
+            if (x.id === id) {
                 cartIndex = i;
             }
-        })
+        });
         let productIndex;
         carts[cartIndex].products.forEach((x, i) => {
-            if(x.id === productId) {
+            if (x.id === productId) {
                 productIndex = i;
             }
         });
         if (productIndex !== undefined) {
-            carts[cartIndex].products = carts[cartIndex].products.filter(x => x.id !== productId);
+            carts[cartIndex].products = carts[cartIndex].products.filter(
+                (x) => x.id !== productId
+            );
+            this.writeFile(carts);
         } else {
-            console.log(`El producto con id ${productId} no se encuentra en el carrito`);
+            console.log(
+                `El producto con id ${productId} no se encuentra en el carrito`
+            );
         }
-        try {
-            await fs.promises.writeFile(this.fileName, JSON.stringify(carts));
-        } catch (err) {
-            console.log(err);
-        } 
-
     }
-
 }
 
 module.exports = CartContainer;
