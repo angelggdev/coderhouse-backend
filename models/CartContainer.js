@@ -71,13 +71,8 @@ class CartContainer {
                 productIndex = i;
             }
         });
-        console.log(productIndex)
-        if (productIndex) {
-            carts[cartIndex].products[productIndex] = {
-                ...carts[cartIndex].products[productIndex],
-                quantity : carts[cartIndex].products[productIndex].quantity + quantity
-            }
-            console.log(carts[cartIndex].products[productIndex])
+        if (productIndex !== undefined) {
+            carts[cartIndex].products[productIndex].quantity += quantity;
         } else {
             let product;
             try{
@@ -95,6 +90,40 @@ class CartContainer {
         } catch (err) {
             console.log(err);
         }  
+
+    }
+
+    async deleteProduct(id, productId){
+        let carts;
+        try {
+            carts = JSON.parse(
+                await fs.promises.readFile(this.fileName, 'utf-8')
+            )
+        } catch (err) {
+            console.log(err);
+        }
+        let cartIndex;
+        carts.forEach((x, i) => {
+            if(x.id === id){
+                cartIndex = i;
+            }
+        })
+        let productIndex;
+        carts[cartIndex].products.forEach((x, i) => {
+            if(x.id === productId) {
+                productIndex = i;
+            }
+        });
+        if (productIndex !== undefined) {
+            carts[cartIndex].products = carts[cartIndex].products.filter(x => x.id !== productId);
+        } else {
+            console.log(`El producto con id ${productId} no se encuentra en el carrito`);
+        }
+        try {
+            await fs.promises.writeFile(this.fileName, JSON.stringify(carts));
+        } catch (err) {
+            console.log(err);
+        } 
 
     }
 

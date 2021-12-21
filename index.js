@@ -103,6 +103,12 @@ cartRouter.post('/:id/productos', async (request, response) => {
     response.send(`se agregó el producto con id ${productId} al carrito con id ${cartId}`);
 })
 
+cartRouter.delete('/:id/productos/:id_prod', async (request, response) => {
+    const cartId = parseInt(request.params.id);
+    const productId = parseInt(request.params.id_prod);
+    await cart.deleteProduct(cartId, productId);
+    response.send(`se eliminó el producto con id ${productId} del carrito con id ${cartId}`)
+})
 
 //api configuration
 app.use('/api/productos', router);
