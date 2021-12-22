@@ -3,7 +3,7 @@ const FileSystem = require('./FileSystem');
 
 class ProductContainer extends FileSystem {
     constructor() {
-        super('./txt/productos.txt')
+        super('./txt/productos.txt');
     }
 
     async save(object) {
@@ -48,8 +48,13 @@ class ProductContainer extends FileSystem {
 
     async deleteById(number) {
         let objects = await this.readFile();
-        objects = objects.filter((x) => x.id !== number);
-        await this.writeFile(objects);
+        let filteredObjects = objects.filter((x) => x.id !== number);
+        if (objects.length === filteredObjects.length) {
+            return `no se encontró el producto con id ${number}`;
+        } else {
+            await this.writeFile(filteredObjects);
+            return `producto con id ${number} eliminado`;
+        }
     }
 }
 

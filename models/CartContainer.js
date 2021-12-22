@@ -3,19 +3,18 @@ const FileSystem = require('./FileSystem');
 
 const productContainer = new ProductContainer();
 
-class CartContainer extends FileSystem{
-    
-    constructor(){
+class CartContainer extends FileSystem {
+    constructor() {
         super('./txt/carrito.txt');
     }
 
     async createCart() {
         let carts = await this.readFile();
         const id = carts.length === 0 ? 1 : carts[carts.length - 1].id + 1;
-        let newCart = { 
+        let newCart = {
             id: id,
             timestamp: Date.now(),
-            products: [] 
+            products: [],
         };
         carts.push(newCart);
         await this.writeFile(carts);
@@ -25,10 +24,11 @@ class CartContainer extends FileSystem{
     async deleteCart(id) {
         const carts = await this.readFile();
         const filteredCarts = carts.filter((x) => x.id !== id);
-        if (carts.length === filteredCarts.length ) {
-            console.log(`no se encontró el carrito con id ${id}`);
+        if (carts.length === filteredCarts.length) {
+            return `no se encontró el carrito con id ${id}`;
         } else {
             await this.writeFile(filteredCarts);
+            return `se ha eliminado el carrito con el id ${id}`;
         }
     }
 
@@ -59,6 +59,8 @@ class CartContainer extends FileSystem{
             });
             if (productIndex !== undefined) {
                 carts[cartIndex].products[productIndex].quantity += quantity;
+                this.writeFile(carts);
+                return `Se ha actualizado el producto con el id ${id}`;
             } else {
                 let product;
                 try {
@@ -66,14 +68,19 @@ class CartContainer extends FileSystem{
                 } catch (err) {
                     console.log(err);
                 }
-                carts[cartIndex].products.push({
-                    ...product,
-                    quantity,
-                });
+                if (product) {
+                    carts[cartIndex].products.push({
+                        ...product,
+                        quantity,
+                    });
+                    this.writeFile(carts);
+                    return `Se ha agregado un producto con el id ${id}`;
+                } else {
+                    return `No se ha encontrado el producto con el id ${id}`;
+                }
             }
-            this.writeFile(carts);
         } else {
-            console.log(`No se encontró el carrito con id ${id}`)
+            return `No se encontró el carrito con id ${id}`;
         }
     }
 
@@ -87,7 +94,6 @@ class CartContainer extends FileSystem{
         });
         let productIndex;
         if (cartIndex !== undefined) {
-
             carts[cartIndex].products.forEach((x, i) => {
                 if (x.id === productId) {
                     productIndex = i;
@@ -98,13 +104,12 @@ class CartContainer extends FileSystem{
                     (x) => x.id !== productId
                 );
                 this.writeFile(carts);
+                return `Se eliminó el producto con id ${productId} del carrito`;
             } else {
-                console.log(
-                    `El producto con id ${productId} no se encuentra en el carrito`
-                );
+                return `El producto con id ${productId} no se encuentra en el carrito`;
             }
         } else {
-            console.log(`No se encontró el carrito con id ${id}`)
+            return `No se encontró el carrito con id ${id}`;
         }
     }
 }

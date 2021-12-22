@@ -1,7 +1,6 @@
 const fs = require('fs');
 
 class FileSystem {
-
     constructor(fileName) {
         this.fileName = fileName;
     }
