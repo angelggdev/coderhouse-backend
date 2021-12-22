@@ -6,10 +6,6 @@ const CartContainer = require('./models/CartContainer');
 
 //variables
 const app = express();
-const httpServer = new HttpServer(app);
-const io = new IOServer(httpServer);
-
-//declaracion de otras variables
 const PORT = process.env.PORT || 8080;
 const productContainer = new ProductContainer('./txt/productos.txt');
 const cart = new CartContainer();

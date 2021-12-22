@@ -1,4 +1,3 @@
-const fs = require('fs');
 const FileSystem = require('./FileSystem');
 
 class ProductContainer extends FileSystem {
