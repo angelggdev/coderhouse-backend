@@ -1,28 +1,9 @@
 const fs = require('fs');
+const FileSystem = require('./FileSystem');
 
-class Container {
-    constructor(fileName) {
-        this.fileName = fileName;
-    }
-
-    async readFile() {
-        let object = [];
-        try {
-            object = JSON.parse(
-                await fs.promises.readFile(this.fileName, 'utf-8')
-            );
-        } catch (err) {
-            console.log(err);
-        }
-        return object;
-    }
-
-    async writeFile(object) {
-        try {
-            await fs.promises.writeFile(this.fileName, JSON.stringify(object));
-        } catch (err) {
-            console.log(err);
-        }
+class ProductContainer extends FileSystem {
+    constructor() {
+        super('./txt/productos.txt')
     }
 
     async save(object) {
@@ -37,9 +18,7 @@ class Container {
             let objectIndex;
             objects.forEach((x, i) => x.id === object.id && (objectIndex = i));
             if (objectIndex) {
-                objects[objectIndex] = {
-                    ...object,
-                };
+                Object.assign(objects[objectIndex], object);
                 await this.writeFile(objects);
                 return `se actualizó el producto con el id ${object.id}`;
             } else {
@@ -74,4 +53,4 @@ class Container {
     }
 }
 
-module.exports = Container;
+module.exports = ProductContainer;

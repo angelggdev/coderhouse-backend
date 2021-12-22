@@ -1,29 +1,12 @@
-const fs = require('fs');
-const Container = require('./Container');
+const ProductContainer = require('./ProductContainer');
+const FileSystem = require('./FileSystem');
 
-const container = new Container('./txt/productos.txt');
+const productContainer = new ProductContainer();
 
-class CartContainer {
-    fileName = './txt/carrito.txt';
-
-    async readFile() {
-        let object = [];
-        try {
-            object = JSON.parse(
-                await fs.promises.readFile(this.fileName, 'utf-8')
-            );
-        } catch (err) {
-            console.log(err);
-        }
-        return object;
-    }
-
-    async writeFile(object) {
-        try {
-            await fs.promises.writeFile(this.fileName, JSON.stringify(object));
-        } catch (err) {
-            console.log(err);
-        }
+class CartContainer extends FileSystem{
+    
+    constructor(){
+        super('./txt/carrito.txt');
     }
 
     async createCart() {
@@ -40,15 +23,23 @@ class CartContainer {
     }
 
     async deleteCart(id) {
-        let carts = await this.readFile();
-        carts = carts.filter((x) => x.id !== id);
-        await this.writeFile(carts);
+        const carts = await this.readFile();
+        const filteredCarts = carts.filter((x) => x.id !== id);
+        if (carts.length === filteredCarts.length ) {
+            console.log(`no se encontró el carrito con id ${id}`);
+        } else {
+            await this.writeFile(filteredCarts);
+        }
     }
 
     async getProducts(id) {
         let cart = await this.readFile();
         cart = cart.filter((x) => x.id === id)[0];
-        return cart.products;
+        if (cart) {
+            return cart.products;
+        } else {
+            return null;
+        }
     }
 
     async addProduct(id, productId, quantity) {
@@ -60,26 +51,30 @@ class CartContainer {
             }
         });
         let productIndex;
-        carts[cartIndex].products.forEach((x, i) => {
-            if (x.id === productId) {
-                productIndex = i;
-            }
-        });
-        if (productIndex !== undefined) {
-            carts[cartIndex].products[productIndex].quantity += quantity;
-        } else {
-            let product;
-            try {
-                product = await container.getById(productId);
-            } catch (err) {
-                console.log(err);
-            }
-            carts[cartIndex].products.push({
-                ...product,
-                quantity,
+        if (cartIndex !== undefined) {
+            carts[cartIndex].products.forEach((x, i) => {
+                if (x.id === productId) {
+                    productIndex = i;
+                }
             });
+            if (productIndex !== undefined) {
+                carts[cartIndex].products[productIndex].quantity += quantity;
+            } else {
+                let product;
+                try {
+                    product = await productContainer.getById(productId);
+                } catch (err) {
+                    console.log(err);
+                }
+                carts[cartIndex].products.push({
+                    ...product,
+                    quantity,
+                });
+            }
+            this.writeFile(carts);
+        } else {
+            console.log(`No se encontró el carrito con id ${id}`)
         }
-        this.writeFile(carts);
     }
 
     async deleteProduct(id, productId) {
@@ -91,20 +86,25 @@ class CartContainer {
             }
         });
         let productIndex;
-        carts[cartIndex].products.forEach((x, i) => {
-            if (x.id === productId) {
-                productIndex = i;
+        if (cartIndex !== undefined) {
+
+            carts[cartIndex].products.forEach((x, i) => {
+                if (x.id === productId) {
+                    productIndex = i;
+                }
+            });
+            if (productIndex !== undefined) {
+                carts[cartIndex].products = carts[cartIndex].products.filter(
+                    (x) => x.id !== productId
+                );
+                this.writeFile(carts);
+            } else {
+                console.log(
+                    `El producto con id ${productId} no se encuentra en el carrito`
+                );
             }
-        });
-        if (productIndex !== undefined) {
-            carts[cartIndex].products = carts[cartIndex].products.filter(
-                (x) => x.id !== productId
-            );
-            this.writeFile(carts);
         } else {
-            console.log(
-                `El producto con id ${productId} no se encuentra en el carrito`
-            );
+            console.log(`No se encontró el carrito con id ${id}`)
         }
     }
 }

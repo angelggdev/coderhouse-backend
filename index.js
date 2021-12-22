@@ -1,13 +1,13 @@
 //imports
 const express = require('express');
 const { Router } = express;
-const Container = require('./models/Container.js');
+const ProductContainer = require('./models/ProductContainer.js');
 const CartContainer = require('./models/CartContainer');
 
 //variables
 const app = express();
 const PORT = process.env.PORT || 8080;
-const container = new Container('./txt/productos.txt');
+const productContainer = new ProductContainer('./txt/productos.txt');
 const cart = new CartContainer();
 const isAdmin = true;
 const router = Router();
@@ -22,19 +22,19 @@ app.use(express.static('public'));
 
 //route api/productos
 router.get('/', async (req, res) => {
-    const products = await container.getAll();
+    const products = await productContainer.getAll();
     res.send(products);
 });
 
 router.get('/:id', async (req, res) => {
     const id = parseInt(req.params.id);
-    const item = await container.getById(id);
+    const item = await productContainer.getById(id);
     item ? res.send(item) : res.send({ error: 'producto no encontrado' });
 });
 
 router.post('/', async (req, res) => {
     if (isAdmin) {
-        const operation = await container.save({
+        const operation = await productContainer.save({
             title: req.body.title,
             price: req.body.price,
             thumbnail: req.body.thumbnail,
@@ -53,11 +53,13 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
     if (isAdmin) {
-        const operation = await container.save({
+        const operation = await productContainer.save({
             id: parseInt(req.params.id),
             title: req.body.title,
             price: req.body.price,
             thumbnail: req.body.thumbnail,
+            description: req.body.description,
+            stock: req.body.stock
         });
         res.send(operation);
     } else {
@@ -70,7 +72,7 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
     if (isAdmin) {
-        await container.deleteById(parseInt(req.params.id));
+        await productContainer.deleteById(parseInt(req.params.id));
         res.send(`producto con id ${req.params.id} eliminado`);
     } else {
         res.send({
@@ -90,7 +92,7 @@ cartRouter.delete('/:id', async (req, res) => {
     const id = parseInt(req.params.id);
     await cart
         .deleteCart(id)
-        .then((res) => res.send(`se ha eliminado el carrito con el id ${id}`));
+        .then(() => res.send(`se ha eliminado el carrito con el id ${id}`));
 });
 
 cartRouter.get('/:id/productos', async (req, res) => {
@@ -126,7 +128,7 @@ app.get('*', (req, res) => {
     const requestedMethod = req.method;
     res.send({
         error: -2,
-        descripcion: `ruta ${requestedRoute} método ${requestedMethod} no imlepementada`,
+        descripcion: `ruta ${requestedRoute} método ${requestedMethod} no implementada`,
     });
 });
 
