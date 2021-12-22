@@ -22,7 +22,9 @@ class ProductContainer extends FileSystem {
                 await this.writeFile(objects);
                 return `se actualizó el producto con el id ${object.id}`;
             } else {
-                return `no se encontró un producto con el id ${object.id}`;
+                return {
+                    error: `no se encontró un producto con el id ${object.id}`,
+                };
             }
         }
     }
@@ -42,7 +44,7 @@ class ProductContainer extends FileSystem {
         if (objects.length > 0) {
             return objects;
         } else {
-            return 'no se han encontrado productos';
+            return { error: 'no se han encontrado productos' };
         }
     }
 
@@ -50,7 +52,7 @@ class ProductContainer extends FileSystem {
         let objects = await this.readFile();
         let filteredObjects = objects.filter((x) => x.id !== number);
         if (objects.length === filteredObjects.length) {
-            return `no se encontró el producto con id ${number}`;
+            return { error: `no se encontró el producto con id ${number}` };
         } else {
             await this.writeFile(filteredObjects);
             return `producto con id ${number} eliminado`;

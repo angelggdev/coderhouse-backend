@@ -25,7 +25,7 @@ class CartContainer extends FileSystem {
         const carts = await this.readFile();
         const filteredCarts = carts.filter((x) => x.id !== id);
         if (carts.length === filteredCarts.length) {
-            return `no se encontró el carrito con id ${id}`;
+            return { error: `no se encontró el carrito con id ${id}` };
         } else {
             await this.writeFile(filteredCarts);
             return `se ha eliminado el carrito con el id ${id}`;
@@ -76,11 +76,13 @@ class CartContainer extends FileSystem {
                     this.writeFile(carts);
                     return `Se ha agregado un producto con el id ${id}`;
                 } else {
-                    return `No se ha encontrado el producto con el id ${id}`;
+                    return {
+                        error: `No se ha encontrado el producto con el id ${id}`,
+                    };
                 }
             }
         } else {
-            return `No se encontró el carrito con id ${id}`;
+            return { error: `No se encontró el carrito con id ${id}` };
         }
     }
 
@@ -106,10 +108,12 @@ class CartContainer extends FileSystem {
                 this.writeFile(carts);
                 return `Se eliminó el producto con id ${productId} del carrito`;
             } else {
-                return `El producto con id ${productId} no se encuentra en el carrito`;
+                return {
+                    error: `El producto con id ${productId} no se encuentra en el carrito`,
+                };
             }
         } else {
-            return `No se encontró el carrito con id ${id}`;
+            return { error: `No se encontró el carrito con id ${id}` };
         }
     }
 }
