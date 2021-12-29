@@ -7,7 +7,7 @@ div(class="container d-flex flex-column justify-content-center", style='margin: 
                 th Imagen
             each product in list
                 tr
-                    td=product.title
+                    td=product.name
                     td=product.price
                     td
                         img(src=product.thumbnail, alt=product.title, width='100px')
