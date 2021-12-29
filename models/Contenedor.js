@@ -38,10 +38,8 @@ class Contenedor {
             console.log(err);
         }
         if (object.length) {
-            console.log('producto con id 2: \n', object);
             return object;
         } else {
-            console.log(`no se ha encontrado un producto con el id ${number}`);
             return null;
         }
     }
@@ -62,7 +60,6 @@ class Contenedor {
         } catch (err) {
             console.log(err);
         }
-        console.log(`producto con id ${number} eliminado`);
     }
 
     deleteAll() {

@@ -39,44 +39,42 @@ app.get('/', async (req, res) => {
     res.render('index.pug', { list: list, showList: showList });
 });
 
-router.get('/', async (request, response) => {
+router.get('/', async (req, res) => {
     const list = await contenedor.getAll();
     const showList = list.length > 0 ? true : false;
-    response.render('productos.pug', { list: list, showList: showList });
+    res.render('productos.pug', { list: list, showList: showList });
 });
 
-router.get('/:id', async (request, response) => {
-    const id = parseInt(request.params.id);
+router.get('/:id', async (req, res) => {
+    const id = parseInt(req.params.id);
     const item = await contenedor.getById(id);
-    item
-        ? response.send(item)
-        : response.send({ error: 'producto no encontrado' });
+    item ? res.send(item) : res.send({ error: 'producto no encontrado' });
 });
 
-router.post('/', async (request, response) => {
+router.post('/', async (req, res) => {
     await contenedor.save({
-        name: request.body.title,
-        price: request.body.price,
-        thumbnail: request.body.thumbnail,
+        name: req.body.title,
+        price: req.body.price,
+        thumbnail: req.body.thumbnail,
     });
     const list = awaitcontenedor.getAll();
     const showList = list.length > 0 ? true : false;
-    response.render('productos.pug', { list: list, showList: showList });
+    res.render('productos.pug', { list: list, showList: showList });
 });
 
-router.put('/:id', async (request, response) => {
+router.put('/:id', async (req, res) => {
     await contenedor.save({
-        id: parseInt(request.params.id),
-        name: request.body.title,
-        price: request.body.price,
-        thumbnail: request.body.thumbnail,
+        id: parseInt(req.params.id),
+        name: req.body.title,
+        price: req.body.price,
+        thumbnail: req.body.thumbnail,
     });
-    response.send(`se actualizó un producto con el id ${request.params.id}`);
+    res.send(`se actualizó un producto con el id ${req.params.id}`);
 });
 
-router.delete('/:id', async (request, response) => {
-    await contenedor.deleteById(parseInt(request.params.id));
-    response.send(`producto con id ${request.params.id} eliminado`);
+router.delete('/:id', async (req, res) => {
+    await contenedor.deleteById(parseInt(req.params.id));
+    res.send(`producto con id ${req.params.id} eliminado`);
 });
 
 app.use('/api/productos', router);
@@ -86,7 +84,7 @@ io.on('connection', async (socket) => {
     //chat socket
     try {
         messages = JSON.parse(
-            await fs.promises.readFile('messages.txt', 'utf-8')
+            await fs.promises.readFile('./txt/messages.txt', 'utf-8')
         );
     } catch (err) {
         console.log(err);
@@ -101,7 +99,7 @@ io.on('connection', async (socket) => {
 
         try {
             savedMessages = JSON.parse(
-                await fs.promises.readFile('messages.txt', 'utf-8')
+                await fs.promises.readFile('./txt/messages.txt', 'utf-8')
             );
         } catch (err) {
             console.log(err);
@@ -109,7 +107,7 @@ io.on('connection', async (socket) => {
         savedMessages.unshift(data);
         try {
             fs.promises.writeFile(
-                'messages.txt',
+                './txt/messages.txt',
                 JSON.stringify(savedMessages)
             );
         } catch (err) {
