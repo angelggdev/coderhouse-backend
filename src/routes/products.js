@@ -1,6 +1,6 @@
-const ProductContainer = require('../models/ProductContainer.js');
+const ProductFsDao = require('../daos/products/ProductFsDao');
 
-const productContainer = new ProductContainer('../txt/productos.txt');
+const productContainer = new ProductFsDao();
 const isAdmin = true;
 
 module.exports = function(router){
@@ -10,7 +10,7 @@ module.exports = function(router){
 
     router.get('/:id', async (req, res) => {
         const item = await productContainer.getById(parseInt(req.params.id));
-        item ? res.send(item) : res.send({ error: 'producto no encontrado' });
+        item.error ? res.send({ error: 'producto no encontrado' }) : res.send(item);
     });
 
     router.post('/', async (req, res) => {
@@ -55,7 +55,8 @@ module.exports = function(router){
 
     router.delete('/:id', async (req, res) => {
         if (isAdmin) {
-            res.send(await productContainer.deleteById(parseInt(req.params.id)));
+            const operation = await productContainer.deleteById(parseInt(req.params.id));
+            operation.error? res.send(`No se ha encontrado un producto con el id ${id}`) : res.send(operation);
         } else {
             res.send({
                 error: -1,

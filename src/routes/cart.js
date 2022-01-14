@@ -1,6 +1,6 @@
-const CartContainer = require('../models/CartContainer');
+const CartFsDao = require('../daos/carts/CartFsDao');
 
-const cart = new CartContainer();
+const cart = new CartFsDao();
 
 module.exports = function(cartRouter) {
     cartRouter.post('/', async (req, res) => {
@@ -9,14 +9,15 @@ module.exports = function(cartRouter) {
     });
 
     cartRouter.delete('/:id', async (req, res) => {
-        res.send(await cart.deleteCart(parseInt(req.params.id)));
+        const operation = await cart.deleteById(parseInt(req.params.id))
+        operation.error? res.send(`no se encontró un carrito con el id ${req.params.id}`):res.send(operation);
     });
 
     cartRouter.get('/:id/productos', async (req, res) => {
-        const operation = await cart.getProducts(parseInt(req.params.id));
-        operation
-            ? res.send(operation)
-            : res.send(`no se encontró un carrito con el id ${req.params.id}`);
+        const operation = await cart.getById(parseInt(req.params.id));
+        operation.error
+            ? res.send(`no se encontró un carrito con el id ${req.params.id}`)
+            : res.send(operation.products);
     });
 
     cartRouter.post('/:id/productos', async (req, res) => {
