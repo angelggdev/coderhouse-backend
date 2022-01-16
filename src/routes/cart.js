@@ -46,9 +46,9 @@ module.exports = function(cartRouter) {
 
     cartRouter.delete('/:id/products/:id_prod', async (req, res) => {
         res.send(
-            await cart.deleteProduct(
-                parseInt(req.params.id),
-                parseInt(req.params.id_prod)
+            await cart.deleteCartProduct(
+                req.params.id,
+                req.params.id_prod
             )
         );
     });

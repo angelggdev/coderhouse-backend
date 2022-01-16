@@ -160,7 +160,7 @@ class ContainerFs {
                 }
                 if (product) {
                     carts[cartIndex].products.push({
-                        ...product,
+                        id: productId,
                         quantity,
                     });
                     this.writeFile(carts);

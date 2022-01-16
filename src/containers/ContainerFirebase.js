@@ -1,5 +1,6 @@
 const admin = require("firebase-admin");
-const serviceAccount = require("../utils/ecommerce-99ede-firebase-adminsdk-h6p0r-8751704e18.json")
+const serviceAccount = require("../utils/ecommerce-99ede-firebase-adminsdk-h6p0r-8751704e18.json");
+const { FieldValue } = require("@google-cloud/firestore");
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
@@ -88,41 +89,37 @@ class ContainerFirebase {
 
     async addProductToCart(id, productId, quantity) {
         const cart = this.query.doc(id);
-        let _productId;
+        let productInCart;
+        let productExists;
         try{
             const subCol = await cart.collection('products').get();
-            _productId = subCol.docs.filter((x) => x.id === productId)[0];
+            productInCart = subCol.docs.filter((x) => x.data().productId === productId)[0];
+        } catch(err) {
+            console.log(err)
+        }
+        try{
+            const products = await this.db.collection('products').get();
+            productExists = products.docs.filter((x) => x.id === productId)[0]? true: false;
+            console.log(productExists)
         } catch(err) {
             console.log(err)
         }
         if (cart !== undefined) {
-            if (_productId !== undefined) {
-                const subCol = cart.collection('products');
-                let _quantity;
-                try{
-                    let product;
-                    await subCol.doc(productId).get().then((res) => product = res.data());
-                    _quantity = product.quantity;
-
-                } catch(e) {
-                    console.log(e);
+            if (productExists) {
+                if (productInCart !== undefined) {
+                    const subCol = cart.collection('products');
+                    const itemUpdated = subCol.doc(productInCart.id).update({quantity: FieldValue.increment(quantity)}, {merge: true});
+                    return `Se ha actualizado el producto con el id ${id}`;
+                } else { 
+                    const subCol = cart.collection('products');
+                    subCol.add({
+                        productId: productId,
+                        quantity: quantity
+                    })
+                    return `Se ha agregado un producto con el id ${id}`; 
                 }
-                const itemUpdated = subCol.doc(productId).update({
-                    quantity: _quantity + quantity
-                })
-                return `Se ha actualizado el producto con el id ${id}`;
-            } else { 
-
-                //en vez de agregar el producto completo solo agregar id: id y desp pedir el producto 
-                const products = await this.db.collection('products').get();
-                let product = products.docs.filter((x) => x.id === productId)[0];
-                product = product.data()
-                const subCol = cart.collection('products');
-                subCol.add({
-                    ...product,
-                    quantity: quantity
-                })
-                return `Se ha agregado un producto con el id ${id}`; 
+            } else {
+                return { error: `No se encontró el producto con id ${productId}` };
             }
         } else {
             return { error: `No se encontró el carrito con id ${id}` };
@@ -130,25 +127,18 @@ class ContainerFirebase {
     }
 
     async deleteCartProduct(id, productId) {
-        let carts = await this.readFile();
-        let cartIndex;
-        carts.forEach((x, i) => {
-            if (x.id === id) {
-                cartIndex = i;
-            }
-        });
-        let productIndex;
-        if (cartIndex !== undefined) {
-            carts[cartIndex].products.forEach((x, i) => {
-                if (x.id === productId) {
-                    productIndex = i;
-                }
-            });
-            if (productIndex !== undefined) {
-                carts[cartIndex].products = carts[cartIndex].products.filter(
-                    (x) => x.id !== productId
-                );
-                this.writeFile(carts);
+        console.log(id)
+        const cart = this.query.doc(id);
+        let productInCart;
+        try{
+            const subCol = await cart.collection('products').get();
+            productInCart = subCol.docs.filter((x) => x.data().productId === productId)[0];
+        } catch(err) {
+            console.log(err)
+        }
+        if (cart) {
+            if (productInCart) {
+                const itemToDelete = cart.collection('products').doc(productInCart.id).delete();
                 return `Se eliminó el producto con id ${productId} del carrito`;
             } else {
                 return {
