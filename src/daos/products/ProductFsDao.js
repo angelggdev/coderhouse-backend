@@ -1,4 +1,4 @@
-const ContainerFs = require('ContainerFs');
+const ContainerFs = require('../../containers/ContainerFs');
 
 class ProductsFsDao extends ContainerFs {
 

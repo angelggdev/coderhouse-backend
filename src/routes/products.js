@@ -1,6 +1,15 @@
 const ProductFsDao = require('../daos/products/ProductFsDao');
+const ProductsFirebaseDao = require('../daos/products/ProductsFirebaseDao');
+const config = require('../utils/config');
 
-const productContainer = new ProductFsDao();
+let productContainer;
+if (config.database === 'fs'){
+    productContainer = new ProductFsDao();
+} else if (config.database === 'firebase') {
+    productContainer = new ProductsFirebaseDao();
+}
+
+
 const isAdmin = true;
 
 module.exports = function(router){
@@ -16,7 +25,7 @@ module.exports = function(router){
     router.post('/', async (req, res) => {
         if (isAdmin) {
             res.send(
-                await productContainer.save({
+                await productContainer.saveProduct({
                     title: req.body.title,
                     price: req.body.price,
                     thumbnail: req.body.thumbnail,
@@ -36,7 +45,7 @@ module.exports = function(router){
     router.put('/:id', async (req, res) => {
         if (isAdmin) {
             res.send(
-                await productContainer.save({
+                await productContainer.updateProduct({
                     id: parseInt(req.params.id),
                     title: req.body.title,
                     price: req.body.price,

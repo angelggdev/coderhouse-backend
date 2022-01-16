@@ -32,24 +32,29 @@ class ContainerFs {
 
     async saveProduct(object) {
         let objects = await this.readFile();
-        if (!object.id) {
-            const id =
-                objects.length === 0 ? 1 : objects[objects.length - 1].id + 1;
-            objects.push({ ...object, id });
+        const id =
+            objects.length === 0 ? 1 : objects[objects.length - 1].id + 1;
+        objects.push({ ...object, id });
+        try{
             await this.writeFile(objects);
             return `se agregó un producto con el id ${id}`;
+        } catch(err) {
+            return err;
+        }
+    }
+
+    async updateProduct(object) {
+        let objects = await this.readFile();
+        let objectIndex;
+        objects.forEach((x, i) => x.id === object.id && (objectIndex = i));
+        if (objectIndex) {
+            Object.assign(objects[objectIndex], object);
+            await this.writeFile(objects);
+            return `se actualizó el producto con el id ${object.id}`;
         } else {
-            let objectIndex;
-            objects.forEach((x, i) => x.id === object.id && (objectIndex = i));
-            if (objectIndex) {
-                Object.assign(objects[objectIndex], object);
-                await this.writeFile(objects);
-                return `se actualizó el producto con el id ${object.id}`;
-            } else {
-                return {
-                    error: `no se encontró un producto con el id ${object.id}`,
-                };
-            }
+            return {
+                error: `no se encontró un producto con el id ${object.id}`,
+            };
         }
     }
 
@@ -66,7 +71,7 @@ class ContainerFs {
     }
 
 
-    /* async getCartProducts(id) {
+    async getCartProducts(id) {
         let cart = await this.readFile();
         cart = cart.filter((x) => x.id === id)[0];
         if (cart) {
@@ -74,7 +79,7 @@ class ContainerFs {
         } else {
             return null;
         }
-    } */
+    } 
 
     /* /////////////////////// */
     async getAll() {
