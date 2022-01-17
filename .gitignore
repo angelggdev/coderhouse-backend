@@ -102,3 +102,9 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Sensitive info
+src/utils/ecommerce-99ede-firebase-adminsdk-h6p0r-8751704e18.json
+src/utils/mongo-config.js
+
+package-lock.json

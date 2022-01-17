@@ -30,7 +30,7 @@ module.exports = function(router){
     });
 
     router.get('/:id', async (req, res) => {
-        const item = await productContainer.getById(parseInt(req.params.id));
+        const item = await productContainer.getById(req.params.id);
         item.error ? res.send({ error: 'producto no encontrado' }) : res.send(item);
     });
 
@@ -58,7 +58,7 @@ module.exports = function(router){
         if (isAdmin) {
             res.send(
                 await productContainer.updateProduct({
-                    id: parseInt(req.params.id),
+                    id: req.params.id,
                     title: req.body.title,
                     price: req.body.price,
                     thumbnail: req.body.thumbnail,
@@ -76,7 +76,7 @@ module.exports = function(router){
 
     router.delete('/:id', async (req, res) => {
         if (isAdmin) {
-            const operation = await productContainer.deleteById(parseInt(req.params.id));
+            const operation = await productContainer.deleteById(req.params.id);
             operation.error? res.send(`No se ha encontrado un producto con el id ${id}`) : res.send(operation);
         } else {
             res.send({

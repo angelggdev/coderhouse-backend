@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 const Product = require('./schemas/product');
-const {ProductInCart, Cart} = require('./schemas/cart');
+const {Cart} = require('./schemas/cart');
+const url = require('../utils/mongo-config');
 
 class ContainerMongo {
     
     constructor(collection) {
-        this.url = `mongodb+srv://angelgarcia:coderhouse-backend@cluster0.oneqt.mongodb.net/ecommerce?retryWrites=true&w=majority`
-        this.rta = mongoose.connect(this.url);
+        this.rta = mongoose.connect(url);
     }
     
     /* Product container */
@@ -17,38 +17,36 @@ class ContainerMongo {
     }
 
     async updateProduct(item) {
-        const itemUpdated = Product.updateOne({...item});
+        const itemUpdated = Product.updateOne({_id: item.id}, {$set: {...item}});
         return itemUpdated;
     }
 
 
     async getById(id) {
-        const doc = this.query.doc(id);
-        const item = await doc.get();
+        const product = await Product.find({_id: id});
 
-        const responseId = item.data();
-
-        if (responseId) {
-            return responseId;
+        if (product) {
+            return product;
         } else {
             return null;
         }
+
     }
 
     async getAll() {
-        const querySnapshot = await this.query.get();
-        const docs = querySnapshot.docs;
+        const products = await Product.find();
 
-        if (docs.length > 0) {
-            return docs.map(doc => doc.data());
+        if (products.length > 0) {
+            return products;
         } else {
             return { error: 'no se han encontrado productos' };
         }
     }
 
     async getCartProducts() {
-        const querySnapshot = await this.query.get();
-        const docs = querySnapshot.docs;
+        //ver
+        const cart = await Cart.child.id
+        console.log(cart)
 
         if (docs.length > 0) {
             return docs.map(doc => doc.data());
@@ -72,18 +70,21 @@ class ContainerMongo {
     /* Cart Container */
 
     async createCart() {
-        const doc = this.query.doc();
-        const cartCreated = await doc.create({
+        const cart = new Cart({
             timestamp: Date.now()
-        })
+        });
+        const cartCreated = await cart.save();
         
-        return cartCreated;
+        return cartCreated._id;
     }
 
 
     async addProductToCart(id, productId, quantity) {
-        const cart = this.query.doc(id);
-        let productInCart;
+        const productInCart = { productId: productId, quantity: quantity};
+        const cart = await Cart.updateOne({_id: id}, {$push: {products: productInCart}}, {upsert: true});
+        console.log(cart)
+        /* const cart = Cart. */
+        /* let productInCart;
         let productExists;
         try{
             const subCol = await cart.collection('products').get();
@@ -117,7 +118,7 @@ class ContainerMongo {
             }
         } else {
             return { error: `No se encontró el carrito con id ${id}` };
-        } 
+        }  */
     }
 
     async deleteCartProduct(id, productId) {
