@@ -1,5 +1,6 @@
 const CartFsDao = require('../daos/carts/CartFsDao');
 const CartFirebaseDao = require('../daos/carts/CartFirebaseDao');
+const CartMongoDao = require('../daos/carts/CartMongoDao');
 const config = require('../utils/config');
 
 let cart;
@@ -10,6 +11,10 @@ switch (config.database) {
         break;
     case 'firebase':
         cart = new CartFirebaseDao();
+        break;
+
+    case 'mongo':
+        cart = new CartMongoDao();
         break;
 
     default:

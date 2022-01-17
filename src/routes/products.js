@@ -1,12 +1,24 @@
 const ProductFsDao = require('../daos/products/ProductFsDao');
 const ProductsFirebaseDao = require('../daos/products/ProductsFirebaseDao');
+const ProductMongoDao = require('../daos/products/ProductMongoDao');
 const config = require('../utils/config');
 
 let productContainer;
-if (config.database === 'fs'){
-    productContainer = new ProductFsDao();
-} else if (config.database === 'firebase') {
-    productContainer = new ProductsFirebaseDao();
+
+switch (config.database) {
+    case 'fs':
+        productContainer = new ProductFsDao();
+        break;
+    case 'firebase':
+        productContainer = new ProductsFirebaseDao();
+        break;
+
+    case 'mongo':
+        productContainer = new ProductMongoDao();
+        break;
+
+    default:
+        break;
 }
 
 
