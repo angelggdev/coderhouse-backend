@@ -1,11 +1,9 @@
 const ContainerMongo = require('../../containers/ContainerMongo');
 
 class ProductMongoDao extends ContainerMongo {
-
-    constructor(){
-        super()
+    constructor() {
+        super();
     }
-
 }
 
 module.exports = ProductMongoDao;

@@ -21,31 +21,38 @@ switch (config.database) {
         break;
 }
 
-
 const isAdmin = true;
 
-module.exports = function(router){
+module.exports = function (router) {
     router.get('/', async (req, res) => {
-        res.send(await productContainer.getAll());
+        const operation = await productContainer.getAll();
+        res.send(operation);
     });
 
     router.get('/:id', async (req, res) => {
         const item = await productContainer.getById(req.params.id);
-        item.error ? res.send({ error: 'producto no encontrado' }) : res.send(item);
+        if (item.error) {
+            res.send(item.error);
+        } else {
+            item
+                ? res.send(item)
+                : res.send(
+                      `no se ha encontrado un producto con id ${req.params.id}`
+                  );
+        }
     });
 
     router.post('/', async (req, res) => {
         if (isAdmin) {
-            res.send(
-                await productContainer.saveProduct({
-                    title: req.body.title,
-                    price: req.body.price,
-                    thumbnail: req.body.thumbnail,
-                    description: req.body.description,
-                    stock: req.body.stock,
-                    timestamp: Date.now(),
-                })
-            );
+            const operation = await productContainer.saveProduct({
+                title: req.body.title,
+                price: req.body.price,
+                thumbnail: req.body.thumbnail,
+                description: req.body.description,
+                stock: req.body.stock,
+                timestamp: Date.now(),
+            });
+            res.send(operation);
         } else {
             res.send({
                 error: -1,
@@ -56,16 +63,15 @@ module.exports = function(router){
 
     router.put('/:id', async (req, res) => {
         if (isAdmin) {
-            res.send(
-                await productContainer.updateProduct({
-                    id: req.params.id,
-                    title: req.body.title,
-                    price: req.body.price,
-                    thumbnail: req.body.thumbnail,
-                    description: req.body.description,
-                    stock: req.body.stock,
-                })
-            );
+            const operation = await productContainer.updateProduct({
+                id: req.params.id,
+                title: req.body.title,
+                price: req.body.price,
+                thumbnail: req.body.thumbnail,
+                description: req.body.description,
+                stock: req.body.stock,
+            });
+            res.send(operation);
         } else {
             res.send({
                 error: -1,
@@ -77,7 +83,7 @@ module.exports = function(router){
     router.delete('/:id', async (req, res) => {
         if (isAdmin) {
             const operation = await productContainer.deleteById(req.params.id);
-            operation.error? res.send(`No se ha encontrado un producto con el id ${id}`) : res.send(operation);
+            res.send(operation);
         } else {
             res.send({
                 error: -1,
@@ -85,4 +91,4 @@ module.exports = function(router){
             });
         }
     });
-}
+};

@@ -1,7 +1,6 @@
 const fs = require('fs');
 
 class ContainerFs {
-
     constructor(fileRoute) {
         this.fileRoute = fileRoute;
     }
@@ -13,18 +12,18 @@ class ContainerFs {
             object = JSON.parse(
                 await fs.promises.readFile(this.fileName, 'utf-8')
             );
+            return object;
         } catch (err) {
-            console.log(err);
+            return { error: err };
         }
-        return object;
     }
 
-    //overwrites a txt file 
+    //overwrites a txt file
     async writeFile(data) {
         try {
             await fs.promises.writeFile(this.fileName, JSON.stringify(data));
         } catch (err) {
-            console.log(err);
+            return { error: err };
         }
     }
 
@@ -35,12 +34,8 @@ class ContainerFs {
         const id =
             objects.length === 0 ? 1 : objects[objects.length - 1].id + 1;
         objects.push({ ...object, id });
-        try{
-            await this.writeFile(objects);
-            return `se agregó un producto con el id ${id}`;
-        } catch(err) {
-            return err;
-        }
+        await this.writeFile(objects);
+        return `se agregó un producto con el id ${id}`;
     }
 
     async updateProduct(object) {
@@ -58,8 +53,6 @@ class ContainerFs {
         }
     }
 
-    /* ////////////////////// */
-
     async getById(number) {
         let object = await this.readFile();
         object = object.filter((x) => x.id === number)[0];
@@ -70,51 +63,28 @@ class ContainerFs {
         }
     }
 
-
-    async getCartProducts(id) {
-        let cart = await this.readFile();
-        cart = cart.filter((x) => x.id === id)[0];
-        if (cart) {
-            return cart.products;
-        } else {
-            return null;
-        }
-    } 
-
-    /* /////////////////////// */
     async getAll() {
         const objects = await this.readFile();
         if (objects.length > 0) {
             return objects;
         } else {
-            return { error: 'no se han encontrado productos' };
+            return [];
         }
     }
 
     //deletes an Item by its Id
     async deleteById(id) {
-        let objects = await this.readFile();
-        let filteredObjects = objects.filter((x) => x.id !== id);
+        const objects = await this.readFile();
+        const filteredObjects = objects.filter((x) => x.id !== id);
         if (objects.length === filteredObjects.length) {
-            return { error: `${id} not found` };
+            return {
+                error: `no se encontró un producto con el id ${object.id}`,
+            };
         } else {
             await this.writeFile(filteredObjects);
-            return id;
+            return `se ha eliminado el producto con id ${id}`;
         }
     }
-
-    /* async deleteCart(id) {
-        const carts = await this.readFile();
-        const filteredCarts = carts.filter((x) => x.id !== id);
-        if (carts.length === filteredCarts.length) {
-            return { error: `${id} not found` };
-        } else {
-            await this.writeFile(filteredCarts);
-            return id;
-        }
-    } */
-
-    /* ////////////////// */
 
     /* Cart Container */
 
@@ -128,9 +98,18 @@ class ContainerFs {
         };
         carts.push(newCart);
         await this.writeFile(carts);
-        return id;
+        return `se ha creado un carrito con el id ${id}`;
     }
 
+    async getCartProducts(id) {
+        let cart = await this.readFile();
+        cart = cart.filter((x) => x.id === id)[0];
+        if (cart) {
+            return cart.products;
+        } else {
+            return [];
+        }
+    }
 
     async addProductToCart(id, productId, quantity) {
         let carts = await this.readFile();
@@ -150,13 +129,13 @@ class ContainerFs {
             if (productIndex !== undefined) {
                 carts[cartIndex].products[productIndex].quantity += quantity;
                 this.writeFile(carts);
-                return `Se ha actualizado el producto con el id ${id}`;
+                return `Se ha actualizado el producto con el id ${productId}`;
             } else {
                 let product;
                 try {
                     product = await productContainer.getById(productId);
                 } catch (err) {
-                    console.log(err);
+                    return { error: err };
                 }
                 if (product) {
                     carts[cartIndex].products.push({
@@ -164,10 +143,10 @@ class ContainerFs {
                         quantity,
                     });
                     this.writeFile(carts);
-                    return `Se ha agregado un producto con el id ${id}`;
+                    return `Se ha agregado un producto con el id ${productId}`;
                 } else {
                     return {
-                        error: `No se ha encontrado el producto con el id ${id}`,
+                        error: `No se ha encontrado el producto con el id ${productId}`,
                     };
                 }
             }
@@ -207,7 +186,9 @@ class ContainerFs {
         }
     }
 
-    /* ////////////////// */
+    async deleteCart(id) {
+        this.deleteById(id);
+    }
 }
 
 module.exports = ContainerFs;
