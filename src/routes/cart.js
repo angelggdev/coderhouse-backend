@@ -33,14 +33,15 @@ module.exports = function (cartRouter) {
     });
 
     cartRouter.get('/:id/products', async (req, res) => {
-        res.send(operation.products);
+        const operation = await cart.getCartProducts(req.params.id);
+        res.send(operation);
     });
 
     cartRouter.post('/:id/products', async (req, res) => {
         const operation = await cart.addProductToCart(
             req.params.id,
             req.body.productId,
-            req.body.quantity
+            parseInt(req.body.quantity)
         );
         res.send(operation);
     });

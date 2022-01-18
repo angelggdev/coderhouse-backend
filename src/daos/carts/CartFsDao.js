@@ -2,7 +2,7 @@ const ContainerFs = require('../../containers/ContainerFs');
 
 class CartFsDao extends ContainerFs {
     constructor() {
-        super('../../txt/cart.txt');
+        super('src/txt/cart.txt');
     }
 }
 

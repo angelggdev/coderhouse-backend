@@ -31,14 +31,12 @@ module.exports = function (router) {
 
     router.get('/:id', async (req, res) => {
         const item = await productContainer.getById(req.params.id);
-        if (item.error) {
-            res.send(item.error);
+        if (item) {
+            res.send(item);
         } else {
-            item
-                ? res.send(item)
-                : res.send(
-                      `no se ha encontrado un producto con id ${req.params.id}`
-                  );
+            res.send(
+                `no se ha encontrado un producto con id ${req.params.id}`
+            );
         }
     });
 
@@ -46,10 +44,10 @@ module.exports = function (router) {
         if (isAdmin) {
             const operation = await productContainer.saveProduct({
                 title: req.body.title,
-                price: req.body.price,
+                price: parseInt(req.body.price),
                 thumbnail: req.body.thumbnail,
                 description: req.body.description,
-                stock: req.body.stock,
+                stock: parseInt(req.body.stock),
                 timestamp: Date.now(),
             });
             res.send(operation);
@@ -66,10 +64,10 @@ module.exports = function (router) {
             const operation = await productContainer.updateProduct({
                 id: req.params.id,
                 title: req.body.title,
-                price: req.body.price,
+                price: parseInt(req.body.price),
                 thumbnail: req.body.thumbnail,
                 description: req.body.description,
-                stock: req.body.stock,
+                stock: parseInt(req.body.stock),
             });
             res.send(operation);
         } else {

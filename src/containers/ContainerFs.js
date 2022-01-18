@@ -7,23 +7,22 @@ class ContainerFs {
 
     //reads the txt file and returns its content
     async readFile() {
-        let object = [];
         try {
-            object = JSON.parse(
-                await fs.promises.readFile(this.fileName, 'utf-8')
+            const object = JSON.parse(
+                await fs.promises.readFile(this.fileRoute, 'utf-8')
             );
             return object;
         } catch (err) {
-            return { error: err };
+            return [];
         }
     }
 
     //overwrites a txt file
     async writeFile(data) {
         try {
-            await fs.promises.writeFile(this.fileName, JSON.stringify(data));
+            await fs.promises.writeFile(this.fileRoute, JSON.stringify(data));
         } catch (err) {
-            return { error: err };
+            console.log(err);
         }
     }
 
@@ -40,10 +39,14 @@ class ContainerFs {
 
     async updateProduct(object) {
         let objects = await this.readFile();
+        object.id = parseInt(object.id);
         let objectIndex;
         objects.forEach((x, i) => x.id === object.id && (objectIndex = i));
-        if (objectIndex) {
-            Object.assign(objects[objectIndex], object);
+
+        //deletes the non existing values from the object
+        let _object = Object.fromEntries(Object.entries(object).filter(([_, v]) => v !== (null || undefined) && !isNaN(v)));
+        if (objectIndex !== undefined) {
+            Object.assign(objects[objectIndex], _object);
             await this.writeFile(objects);
             return `se actualizó el producto con el id ${object.id}`;
         } else {
@@ -54,9 +57,9 @@ class ContainerFs {
     }
 
     async getById(number) {
-        let object = await this.readFile();
-        object = object.filter((x) => x.id === number)[0];
-        if (object) {
+        const objects = await this.readFile();
+        if (objects.length > 0) {
+            const object = objects.filter((x) => x.id === parseInt(number))[0];
             return object;
         } else {
             return null;
@@ -75,14 +78,14 @@ class ContainerFs {
     //deletes an Item by its Id
     async deleteById(id) {
         const objects = await this.readFile();
-        const filteredObjects = objects.filter((x) => x.id !== id);
+        const filteredObjects = objects.filter((x) => x.id !== parseInt(id));
         if (objects.length === filteredObjects.length) {
             return {
-                error: `no se encontró un producto con el id ${object.id}`,
+                error: `no se encontró un item con el id ${id}`,
             };
         } else {
             await this.writeFile(filteredObjects);
-            return `se ha eliminado el producto con id ${id}`;
+            return `se ha eliminado el item con id ${id}`;
         }
     }
 
@@ -103,11 +106,11 @@ class ContainerFs {
 
     async getCartProducts(id) {
         let cart = await this.readFile();
-        cart = cart.filter((x) => x.id === id)[0];
+        cart = cart.filter((x) => x.id === parseInt(id))[0];
         if (cart) {
             return cart.products;
         } else {
-            return [];
+            return { error: `No se encontró el carrito con id ${id}` };
         }
     }
 
@@ -115,31 +118,35 @@ class ContainerFs {
         let carts = await this.readFile();
         let cartIndex;
         carts.forEach((x, i) => {
-            if (x.id === id) {
+            if (x.id === parseInt(id)) {
                 cartIndex = i;
             }
         });
         let productIndex;
         if (cartIndex !== undefined) {
             carts[cartIndex].products.forEach((x, i) => {
-                if (x.id === productId) {
+                if (x.id === parseInt(productId)) {
                     productIndex = i;
                 }
             });
             if (productIndex !== undefined) {
                 carts[cartIndex].products[productIndex].quantity += quantity;
+                carts[cartIndex].products[productIndex].id = parseInt(carts[cartIndex].products[productIndex].id);
                 this.writeFile(carts);
                 return `Se ha actualizado el producto con el id ${productId}`;
             } else {
                 let product;
                 try {
-                    product = await productContainer.getById(productId);
+                    const products = JSON.parse(
+                        await fs.promises.readFile(this.fileRoute, 'utf-8')
+                    );
+                    product = products.filter((x) => x.id === parseInt(productId))[0];
                 } catch (err) {
-                    return { error: err };
+                    return {error: err}
                 }
                 if (product) {
                     carts[cartIndex].products.push({
-                        id: productId,
+                        id: parseInt(productId),
                         quantity,
                     });
                     this.writeFile(carts);
@@ -159,20 +166,20 @@ class ContainerFs {
         let carts = await this.readFile();
         let cartIndex;
         carts.forEach((x, i) => {
-            if (x.id === id) {
+            if (x.id === parseInt(id)) {
                 cartIndex = i;
             }
         });
         let productIndex;
         if (cartIndex !== undefined) {
             carts[cartIndex].products.forEach((x, i) => {
-                if (x.id === productId) {
+                if (x.id === parseInt(productId)) {
                     productIndex = i;
                 }
             });
             if (productIndex !== undefined) {
                 carts[cartIndex].products = carts[cartIndex].products.filter(
-                    (x) => x.id !== productId
+                    (x) => x.id !== parseInt(productId)
                 );
                 this.writeFile(carts);
                 return `Se eliminó el producto con id ${productId} del carrito`;
@@ -186,8 +193,8 @@ class ContainerFs {
         }
     }
 
-    async deleteCart(id) {
-        this.deleteById(id);
+    async deleteCartById(id) {
+        return await this.deleteById(parseInt(id));
     }
 }
 
