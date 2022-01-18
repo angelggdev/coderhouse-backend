@@ -28,12 +28,12 @@ module.exports = function(cartRouter) {
     });
 
     cartRouter.delete('/:id', async (req, res) => {
-        const operation = await cart.deleteById(parseInt(req.params.id))
+        const operation = await cart.deleteCartById(req.params.id)
         operation.error? res.send(`no se encontró un carrito con el id ${req.params.id}`):res.send(operation);
     });
 
     cartRouter.get('/:id/products', async (req, res) => {
-        const operation = await cart.getCartProducts(parseInt(req.params.id));
+        const operation = await cart.getCartProducts(req.params.id);
         operation.error
             ? res.send(`no se encontró un carrito con el id ${req.params.id}`)
             : res.send(operation.products);
@@ -44,7 +44,7 @@ module.exports = function(cartRouter) {
             await cart.addProductToCart(
                 req.params.id,
                 req.body.productId,
-                parseInt(req.body.quantity)
+                req.body.quantity
             )
         );
     });
