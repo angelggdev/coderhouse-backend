@@ -34,9 +34,7 @@ module.exports = function (router) {
         if (item) {
             res.send(item);
         } else {
-            res.send(
-                `no se ha encontrado un producto con id ${req.params.id}`
-            );
+            res.send(`no se ha encontrado un producto con id ${req.params.id}`);
         }
     });
 
@@ -63,11 +61,11 @@ module.exports = function (router) {
         if (isAdmin) {
             const operation = await productContainer.updateProduct({
                 id: req.params.id,
-                title: req.body.title? req.body.title:null,
-                price: req.body.price? req.body.price:null,
-                thumbnail: req.body.thumbnail? req.body.thumbnail:null,
-                description: req.body.description? req.body.description:null,
-                stock: req.body.stock? req.body.stock:null,
+                title: req.body.title ? req.body.title : null,
+                price: req.body.price ? req.body.price : null,
+                thumbnail: req.body.thumbnail ? req.body.thumbnail : null,
+                description: req.body.description ? req.body.description : null,
+                stock: req.body.stock ? req.body.stock : null,
             });
             res.send(operation);
         } else {

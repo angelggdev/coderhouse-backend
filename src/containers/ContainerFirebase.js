@@ -13,7 +13,7 @@ class ContainerFirebase {
         this.query = this.db.collection(this.collection);
     }
 
-    /* Product container */
+    /* Product */
 
     async saveProduct(item) {
         const doc = this.query.doc();
@@ -28,7 +28,9 @@ class ContainerFirebase {
     async updateProduct(item) {
         const docToUpdate = this.query.doc(item.id);
         const docToUpdateExists = (await docToUpdate.get()).exists;
-        let _item = Object.fromEntries(Object.entries(item).filter(([_, v]) => v !== null ));
+        let _item = Object.fromEntries(
+            Object.entries(item).filter(([_, v]) => v !== null)
+        );
         delete _item.id;
         if (docToUpdateExists) {
             try {
@@ -72,7 +74,6 @@ class ContainerFirebase {
         }
     }
 
-    //deletes an Item by its Id
     async deleteById(id) {
         const docToDelete = this.query.doc(id);
         const productExists = (await docToDelete.get()).exists;
@@ -90,7 +91,7 @@ class ContainerFirebase {
         }
     }
 
-    /* Cart Container */
+    /* Cart */
 
     async createCart() {
         const doc = this.query.doc();
@@ -108,10 +109,10 @@ class ContainerFirebase {
         try {
             const cart = this.query.doc(id);
             let cartExists;
-            try{
+            try {
                 cartExists = (await cart.get()).exists;
-            } catch(err) {
-                return {error: err};
+            } catch (err) {
+                return { error: err };
             }
             const products = (await cart.collection('products').get()).docs;
             if (cartExists) {
@@ -129,10 +130,10 @@ class ContainerFirebase {
         let cartExists;
         let productInCart;
         let productExists;
-        try{
+        try {
             cartExists = (await cart.get()).exists;
-        } catch(err) {
-            return {error: err};
+        } catch (err) {
+            return { error: err };
         }
         try {
             const subCol = await cart.collection('products').get();
@@ -191,10 +192,10 @@ class ContainerFirebase {
         const cart = this.query.doc(id);
         let cartExists;
         let productInCart;
-        try{
+        try {
             cartExists = (await cart.get()).exists;
-        } catch(err) {
-            return {error: err};
+        } catch (err) {
+            return { error: err };
         }
         try {
             const subCol = await cart.collection('products').get();

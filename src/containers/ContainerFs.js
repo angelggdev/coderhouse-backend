@@ -26,7 +26,7 @@ class ContainerFs {
         }
     }
 
-    /* Product container */
+    /* Product */
 
     async saveProduct(object) {
         let objects = await this.readFile();
@@ -42,9 +42,9 @@ class ContainerFs {
         object.id = parseInt(object.id);
         let objectIndex;
         objects.forEach((x, i) => x.id === object.id && (objectIndex = i));
-
-        //deletes the non existing values from the object
-        let _object = Object.fromEntries(Object.entries(object).filter(([_, v]) => v !== null ));
+        let _object = Object.fromEntries(
+            Object.entries(object).filter(([_, v]) => v !== null)
+        );
         if (objectIndex !== undefined) {
             Object.assign(objects[objectIndex], _object);
             await this.writeFile(objects);
@@ -75,7 +75,6 @@ class ContainerFs {
         }
     }
 
-    //deletes an Item by its Id
     async deleteById(id) {
         const objects = await this.readFile();
         const filteredObjects = objects.filter((x) => x.id !== parseInt(id));
@@ -89,7 +88,7 @@ class ContainerFs {
         }
     }
 
-    /* Cart Container */
+    /* Cart */
 
     async createCart() {
         let carts = await this.readFile();
@@ -131,7 +130,9 @@ class ContainerFs {
             });
             if (productIndex !== undefined) {
                 carts[cartIndex].products[productIndex].quantity += quantity;
-                carts[cartIndex].products[productIndex].id = parseInt(carts[cartIndex].products[productIndex].id);
+                carts[cartIndex].products[productIndex].id = parseInt(
+                    carts[cartIndex].products[productIndex].id
+                );
                 this.writeFile(carts);
                 return `Se ha actualizado el producto con el id ${productId}`;
             } else {
@@ -140,9 +141,11 @@ class ContainerFs {
                     const products = JSON.parse(
                         await fs.promises.readFile(this.fileRoute, 'utf-8')
                     );
-                    product = products.filter((x) => x.id === parseInt(productId))[0];
+                    product = products.filter(
+                        (x) => x.id === parseInt(productId)
+                    )[0];
                 } catch (err) {
-                    return {error: err}
+                    return { error: err };
                 }
                 if (product) {
                     carts[cartIndex].products.push({

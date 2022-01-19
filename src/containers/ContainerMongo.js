@@ -8,7 +8,7 @@ class ContainerMongo {
         this.rta = mongoose.connect(url);
     }
 
-    /* Product container */
+    /* Product */
 
     async saveProduct(item) {
         const product = new Product(item);
@@ -29,12 +29,11 @@ class ContainerMongo {
                 error: `no se encontró un producto con el id ${item.id}`,
             };
         }
-        let _item = Object.fromEntries(Object.entries(item).filter(([_, v]) => v !== null ));
-        Object.assign(product, _item)
-        await Product.updateOne(
-            { _id: item.id },
-            { $set: { ...product } }
+        let _item = Object.fromEntries(
+            Object.entries(item).filter(([_, v]) => v !== null)
         );
+        Object.assign(product, _item);
+        await Product.updateOne({ _id: item.id }, { $set: { ...product } });
         return `se actualizó el producto con id ${item.id}`;
     }
 
@@ -59,7 +58,6 @@ class ContainerMongo {
         }
     }
 
-    //deletes an Item by its Id
     async deleteById(id) {
         try {
             const product = await Product.find({ _id: id });
@@ -72,7 +70,7 @@ class ContainerMongo {
         }
     }
 
-    /* Cart Container */
+    /* Cart */
 
     async createCart() {
         try {
@@ -106,7 +104,7 @@ class ContainerMongo {
         } catch (err) {
             return { error: `No se encontró el carrito con id ${id}` };
         }
-        const productExists = await this.getById(productId);     
+        const productExists = await this.getById(productId);
         let productIndex;
         cart.products.forEach((product, i) => {
             product.productId === productId && (productIndex = i);
@@ -135,10 +133,9 @@ class ContainerMongo {
             } else {
                 return {
                     error: `No se encontró el producto con id ${productId}`,
-                };  
+                };
             }
         }
-            
     }
 
     async deleteCartProduct(id, productId) {
@@ -166,7 +163,7 @@ class ContainerMongo {
             return {
                 error: `El producto con id ${productId} no se encuentra en el carrito`,
             };
-        }  
+        }
     }
 
     async deleteCartById(id) {
