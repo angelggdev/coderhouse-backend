@@ -32,12 +32,12 @@ module.exports = function (cartRouter) {
         res.send(operation);
     });
 
-    cartRouter.get('/:id/products', async (req, res) => {
+    cartRouter.get('/:id/productos', async (req, res) => {
         const operation = await cart.getCartProducts(req.params.id);
         res.send(operation);
     });
 
-    cartRouter.post('/:id/products', async (req, res) => {
+    cartRouter.post('/:id/productos', async (req, res) => {
         const operation = await cart.addProductToCart(
             req.params.id,
             req.body.productId,
@@ -46,7 +46,7 @@ module.exports = function (cartRouter) {
         res.send(operation);
     });
 
-    cartRouter.delete('/:id/products/:id_prod', async (req, res) => {
+    cartRouter.delete('/:id/productos/:id_prod', async (req, res) => {
         const operation = await cart.deleteCartProduct(
             req.params.id,
             req.params.id_prod

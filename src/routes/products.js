@@ -63,11 +63,11 @@ module.exports = function (router) {
         if (isAdmin) {
             const operation = await productContainer.updateProduct({
                 id: req.params.id,
-                title: req.body.title,
-                price: parseInt(req.body.price),
-                thumbnail: req.body.thumbnail,
-                description: req.body.description,
-                stock: parseInt(req.body.stock),
+                title: req.body.title? req.body.title:null,
+                price: req.body.price? req.body.price:null,
+                thumbnail: req.body.thumbnail? req.body.thumbnail:null,
+                description: req.body.description? req.body.description:null,
+                stock: req.body.stock? req.body.stock:null,
             });
             res.send(operation);
         } else {

@@ -27,16 +27,19 @@ class ContainerFirebase {
 
     async updateProduct(item) {
         const docToUpdate = this.query.doc(item.id);
-        if (docToUpdate) {
+        const docToUpdateExists = (await docToUpdate.get()).exists;
+        let _item = Object.fromEntries(Object.entries(item).filter(([_, v]) => v !== null ));
+        delete _item.id;
+        if (docToUpdateExists) {
             try {
-                await docToUpdate.update(item);
+                await docToUpdate.update(_item);
                 return `se actualizó el producto con id ${item.id}`;
             } catch (err) {
                 return { error: err };
             }
         } else {
             return {
-                error: `no se encontró un producto con el id ${object.id}`,
+                error: `no se encontró un producto con el id ${item.id}`,
             };
         }
     }
@@ -72,16 +75,17 @@ class ContainerFirebase {
     //deletes an Item by its Id
     async deleteById(id) {
         const docToDelete = this.query.doc(id);
-        if (docToDelete) {
+        const productExists = (await docToDelete.get()).exists;
+        if (productExists) {
             try {
                 await docToDelete.delete();
-                return `se ha eliminado el producto con id ${id}`;
+                return `se ha eliminado el item con id ${id}`;
             } catch (err) {
                 return { error: err };
             }
         } else {
             return {
-                error: `no se encontró un producto con el id ${object.id}`,
+                error: `no se encontró un item con el id ${id}`,
             };
         }
     }
@@ -100,15 +104,20 @@ class ContainerFirebase {
         }
     }
 
-    async getCartProducts() {
+    async getCartProducts(id) {
         try {
-            const querySnapshot = await this.query.get();
-            const docs = querySnapshot.docs;
-
-            if (docs.length > 0) {
-                return docs.map((doc) => doc.data());
+            const cart = this.query.doc(id);
+            let cartExists;
+            try{
+                cartExists = (await cart.get()).exists;
+            } catch(err) {
+                return {error: err};
+            }
+            const products = (await cart.collection('products').get()).docs;
+            if (cartExists) {
+                return products.map((product) => product.data());
             } else {
-                return [];
+                return { error: `No se encontró el carrito con id ${id}` };
             }
         } catch (err) {
             return { error: err };
@@ -117,8 +126,14 @@ class ContainerFirebase {
 
     async addProductToCart(id, productId, quantity) {
         const cart = this.query.doc(id);
+        let cartExists;
         let productInCart;
         let productExists;
+        try{
+            cartExists = (await cart.get()).exists;
+        } catch(err) {
+            return {error: err};
+        }
         try {
             const subCol = await cart.collection('products').get();
             productInCart = subCol.docs.filter(
@@ -135,7 +150,7 @@ class ContainerFirebase {
         } catch (err) {
             return { error: err };
         }
-        if (cart !== undefined) {
+        if (cartExists) {
             if (productExists) {
                 if (productInCart !== undefined) {
                     const subCol = cart.collection('products');
@@ -174,7 +189,13 @@ class ContainerFirebase {
 
     async deleteCartProduct(id, productId) {
         const cart = this.query.doc(id);
+        let cartExists;
         let productInCart;
+        try{
+            cartExists = (await cart.get()).exists;
+        } catch(err) {
+            return {error: err};
+        }
         try {
             const subCol = await cart.collection('products').get();
             productInCart = subCol.docs.filter(
@@ -183,7 +204,7 @@ class ContainerFirebase {
         } catch (err) {
             return { error: err };
         }
-        if (cart) {
+        if (cartExists) {
             if (productInCart) {
                 try {
                     await cart
@@ -205,7 +226,7 @@ class ContainerFirebase {
     }
 
     async deleteCartById(id) {
-        this.deleteById(id);
+        return await this.deleteById(id);
     }
 }
 

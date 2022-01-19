@@ -44,7 +44,7 @@ class ContainerFs {
         objects.forEach((x, i) => x.id === object.id && (objectIndex = i));
 
         //deletes the non existing values from the object
-        let _object = Object.fromEntries(Object.entries(object).filter(([_, v]) => v !== (null || undefined) && !isNaN(v)));
+        let _object = Object.fromEntries(Object.entries(object).filter(([_, v]) => v !== null ));
         if (objectIndex !== undefined) {
             Object.assign(objects[objectIndex], _object);
             await this.writeFile(objects);

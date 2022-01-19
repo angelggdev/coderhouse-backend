@@ -22,8 +22,8 @@ require('./routes/products')(router);
 require('./routes/cart')(cartRouter);
 
 //api configuration
-app.use('/api/products', router);
-app.use('/api/cart', cartRouter);
+app.use('/api/productos', router);
+app.use('/api/carrito', cartRouter);
 
 //route 404
 app.get('*', (req, res) => {

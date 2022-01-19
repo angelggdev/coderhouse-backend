@@ -102,7 +102,7 @@ class ContainerMongo {
             if (cart) {
                 return cart.products;
             } else {
-                return [];
+                return { error: `No se encontró el carrito con id ${id}` };
             }
         } catch (err) {
             return { error: err };
