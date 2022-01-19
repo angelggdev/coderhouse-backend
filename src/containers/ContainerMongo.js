@@ -21,34 +21,28 @@ class ContainerMongo {
     }
 
     async updateProduct(item) {
+        let product;
         try {
-            const product = await Product.find({ _id: id });
-            if (product) {
-                await Product.updateOne(
-                    { _id: item.id },
-                    { $set: { ...item } }
-                );
-                return `se actualizó el producto con id ${item.id}`;
-            } else {
-                return {
-                    error: `no se encontró un producto con el id ${object.id}`,
-                };
-            }
+            product = (await Product.find({ _id: item.id }))[0];
         } catch (err) {
-            return { error: err };
+            return {
+                error: `no se encontró un producto con el id ${item.id}`,
+            };
         }
+        let _item = Object.fromEntries(Object.entries(item).filter(([_, v]) => v !== null ));
+        Object.assign(product, _item)
+        await Product.updateOne(
+            { _id: item.id },
+            { $set: { ...product } }
+        );
+        return `se actualizó el producto con id ${item.id}`;
     }
 
     async getById(id) {
         try {
-            const product = await Product.find({ _id: id });
-            if (product) {
-                return product;
-            } else {
-                return null;
-            }
+            return await Product.find({ _id: id });
         } catch (err) {
-            return { error: err };
+            return null;
         }
     }
 
@@ -69,16 +63,12 @@ class ContainerMongo {
     async deleteById(id) {
         try {
             const product = await Product.find({ _id: id });
-            if (product) {
-                await Product.deleteOne({ _id: id });
-                return `se ha eliminado el producto con id ${id}`;
-            } else {
-                return {
-                    error: `no se encontró un producto con el id ${object.id}`,
-                };
-            }
+            await Product.deleteOne({ _id: id });
+            return `se ha eliminado el producto con id ${id}`;
         } catch (err) {
-            return { error: err };
+            return {
+                error: `no se encontró un producto con el id ${id}`,
+            };
         }
     }
 
@@ -98,14 +88,14 @@ class ContainerMongo {
 
     async getCartProducts(id) {
         try {
-            const cart = await Cart.find({ _id: id });
-            if (cart) {
+            const cart = (await Cart.find({ _id: id }))[0];
+            if (cart.products) {
                 return cart.products;
             } else {
-                return { error: `No se encontró el carrito con id ${id}` };
+                return [];
             }
         } catch (err) {
-            return { error: err };
+            return { error: `No se encontró el carrito con id ${id}` };
         }
     }
 
@@ -113,51 +103,42 @@ class ContainerMongo {
         let cart;
         try {
             cart = await Cart.findOne({ _id: id });
-        } catch (e) {
-            return { error: err };
-        }
-        let productExists;
-        try {
-            productExists = await this.getById(productId);
         } catch (err) {
-            return { error: err };
+            return { error: `No se encontró el carrito con id ${id}` };
         }
-
-        if (cart) {
-            if (productExists !== undefined && productExists !== null) {
-                let productIndex;
-                cart.products.forEach((product, i) => {
-                    product.productId === productId && (productIndex = i);
-                });
-                if (productIndex) {
-                    cart.products[productIndex].quantity += quantity;
-                    try {
-                        await cart.save();
-                        return `Se ha actualizado el producto con el id ${productId}`;
-                    } catch (err) {
-                        return { error: err };
-                    }
-                } else {
-                    const product = {
-                        productId: productId,
-                        quantity: quantity,
-                    };
-                    cart.products.push(product);
-                    try {
-                        await cart.save();
-                        `Se ha agregado un producto con el id ${productId}`;
-                    } catch (err) {
-                        return { error: err };
-                    }
+        const productExists = await this.getById(productId);     
+        let productIndex;
+        cart.products.forEach((product, i) => {
+            product.productId === productId && (productIndex = i);
+        });
+        if (productIndex !== undefined) {
+            cart.products[productIndex].quantity += quantity;
+            try {
+                await cart.save();
+                return `Se ha actualizado el producto con el id ${productId}`;
+            } catch (err) {
+                return { error: err };
+            }
+        } else {
+            if (productExists) {
+                const product = {
+                    productId: productId,
+                    quantity: quantity,
+                };
+                cart.products.push(product);
+                try {
+                    await cart.save();
+                    return `Se ha agregado un producto con el id ${productId}`;
+                } catch (err) {
+                    return { error: err };
                 }
             } else {
                 return {
                     error: `No se encontró el producto con id ${productId}`,
-                };
+                };  
             }
-        } else {
-            return { error: `No se encontró el carrito con id ${id}` };
         }
+            
     }
 
     async deleteCartProduct(id, productId) {
@@ -165,54 +146,39 @@ class ContainerMongo {
         try {
             cart = await Cart.findOne({ _id: id });
         } catch (e) {
-            return { error: err };
-        }
-        let productExists;
-        try {
-            productExists = await this.getById(productId);
-        } catch (err) {
-            return { error: err };
-        }
-
-        if (cart) {
-            let productIndex;
-            cart.products.forEach((product, i) => {
-                product.productId === productId && (productIndex = i);
-            });
-            if (productIndex) {
-                cart.products = cart.products.filter(
-                    (product) => product.productId !== productId
-                );
-                try {
-                    await cart.save();
-                    return `Se eliminó el producto con id ${productId} del carrito`;
-                } catch (err) {
-                    return { error: err };
-                }
-            } else {
-                return {
-                    error: `El producto con id ${productId} no se encuentra en el carrito`,
-                };
-            }
-        } else {
             return { error: `No se encontró el carrito con id ${id}` };
         }
+        let productIndex;
+        cart.products.forEach((product, i) => {
+            product.productId === productId && (productIndex = i);
+        });
+        if (productIndex !== undefined) {
+            cart.products = cart.products.filter(
+                (product) => product.productId !== productId
+            );
+            try {
+                await cart.save();
+                return `Se eliminó el producto con id ${productId} del carrito`;
+            } catch (err) {
+                return { error: err };
+            }
+        } else {
+            return {
+                error: `El producto con id ${productId} no se encuentra en el carrito`,
+            };
+        }  
     }
 
     async deleteCartById(id) {
         try {
             const cart = await Cart.find({ _id: id });
-            if (cart) {
-                await Cart.deleteOne({ _id: id });
-                return `se ha eliminado el producto con id ${id}`;
-            } else {
-                return {
-                    error: `no se encontró un producto con el id ${object.id}`,
-                };
-            }
         } catch (err) {
-            return { error: err };
+            return {
+                error: `no se encontró un carrito con el id ${id}`,
+            };
         }
+        await Cart.deleteOne({ _id: id });
+        return `se ha eliminado el carrito con id ${id}`;
     }
 }
 
