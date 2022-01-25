@@ -3,7 +3,7 @@ const express = require('express');
 const { Router } = express;
 const axios = require('axios');
 const fs = require('fs');
-const Contenedor = require('./models/Contenedor.js');
+const Container = require('./controllers/productsController.js');
 const { Server: HttpServer } = require('http');
 const { Server: IOServer } = require('socket.io');
 
@@ -14,7 +14,7 @@ const io = new IOServer(httpServer);
 
 //declaracion de otras variables
 const PORT = process.env.PORT || 8080;
-const contenedor = new Contenedor('products');
+const contenedor = new Container('products');
 let messages = [];
 const router = Router();
 

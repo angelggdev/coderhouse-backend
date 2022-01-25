@@ -1,7 +1,7 @@
 const { options } = require('../options/db');
 const knex = require('knex')(options);
 
-class Contenedor {
+class Container {
     constructor(tableName) {
         this.tableName = tableName;
     }
@@ -71,4 +71,4 @@ class Contenedor {
     }
 }
 
-module.exports = Contenedor;
+module.exports = Container;
