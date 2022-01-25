@@ -71,7 +71,7 @@ io.on('connection', async (socket) => {
         } catch (err) {
             console.log(err);
         }
-        savedMessages.unshift(data);
+        savedMessages.push(data);
         try {
             fs.promises.writeFile(
                 'src/txt/messages.txt',

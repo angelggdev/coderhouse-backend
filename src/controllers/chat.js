@@ -7,7 +7,7 @@ chatSocket.on('messages', (data) => {
 function render(data) {
     if (data.length > 0) {
         data.forEach((info) => {
-            $('#messages').prepend(`
+            $('#messages').append(`
                 <div>
                     <strong style="color:blue">${info.author}</strong>
                     <span style="color:brown">[${info.time}]</span> 
