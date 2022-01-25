@@ -16,6 +16,7 @@ const io = new IOServer(httpServer);
 const PORT = process.env.PORT || 8080;
 const contenedor = new Container('products');
 let messages = [];
+const router = Router();
 
 //configuración del motor de plantillas
 app.set('views', './views');
@@ -32,7 +33,16 @@ server.on('error', (error) => {
 });
 
 //routing
+app.get('/', async (req, res) => {
+    const list = await contenedor.getAll();
+    const showList = list.length > 0 ? true : false;
+    res.render('index.pug', { list: list, showList: showList });
+});
 
+require('./routes/products')(router, contenedor);
+
+//api configuration
+app.use('/api/productos', router);
 
 //Web sockets
 io.on('connection', async (socket) => {
