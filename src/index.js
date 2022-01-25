@@ -39,6 +39,8 @@ app.get('/', async (req, res) => {
     res.render('index.pug', { list: list, showList: showList });
 });
 
+require('./routes/products-test')(app);
+
 require('./routes/products')(router, contenedor);
 
 //api configuration
