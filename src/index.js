@@ -19,7 +19,7 @@ let messages = [];
 const router = Router();
 
 //configuración del motor de plantillas
-app.set('views', './views');
+app.set('views', 'src/views');
 app.set('view engine', 'pug');
 
 //configuración del servidor
@@ -49,7 +49,7 @@ io.on('connection', async (socket) => {
     //chat socket
     try {
         messages = JSON.parse(
-            await fs.promises.readFile('./txt/messages.txt', 'utf-8')
+            await fs.promises.readFile('src/txt/messages.txt', 'utf-8')
         );
     } catch (err) {
         console.log(err);
@@ -64,7 +64,7 @@ io.on('connection', async (socket) => {
 
         try {
             savedMessages = JSON.parse(
-                await fs.promises.readFile('./txt/messages.txt', 'utf-8')
+                await fs.promises.readFile('src/txt/messages.txt', 'utf-8')
             );
         } catch (err) {
             console.log(err);
@@ -72,7 +72,7 @@ io.on('connection', async (socket) => {
         savedMessages.unshift(data);
         try {
             fs.promises.writeFile(
-                './txt/messages.txt',
+                'src/txt/messages.txt',
                 JSON.stringify(savedMessages)
             );
         } catch (err) {
