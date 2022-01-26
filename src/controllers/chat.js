@@ -1,11 +1,24 @@
 const chatSocket = io.connect();
 
-chatSocket.on('messages', (data) => {
-    render(data);
+const authorSchema = new normalizr.schema.Entity('author');
+const messagesSchema = new normalizr.schema.Entity('messages', {
+    messages: [{
+        author: authorSchema
+    }]
 });
 
-function render(data) {
+chatSocket.on('messages', (data) => {
+    const normalizedLength = JSON.stringify(data).length;
+    const _data = normalizr.denormalize(data.result, messagesSchema, data.entities);
+    let denormalizedLength = _data && JSON.stringify(_data).length
+    const compresion = `${Math.floor(normalizedLength/denormalizedLength*100)}%`
+    _data && render(_data.messages, compresion);
+});
+
+function render(data, compresion) {
     if (data.length > 0) {
+        $('#messages').empty();
+        $('#compresion').empty();
         data.forEach((info) => {
             $('#messages').append(`
                 <div style="display:flex; align-items:center; gap: 5px;">
@@ -16,6 +29,7 @@ function render(data) {
                 </div>
             `);
         });
+        $('#compresion').append(compresion);
     }
 }
 

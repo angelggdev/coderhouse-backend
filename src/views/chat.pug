@@ -1,4 +1,5 @@
-h2(style='text-align: center') Centro de Mensajes
+h2(style='text-align: center') Centro de Mensajes - Compresión: 
+    span(id="compresion")
 
 form(id='myForm')
     input(type="email", class='form-control', id='username', placeholder="Ingrese su email", style="margin:10px 0px 0px 0px;")
@@ -18,3 +19,4 @@ form(id='myForm')
     input(type="submit", class="btn btn-primary", value="Enviar", style="margin:10px 0px 10px 0px;")
 
 div(id="messages")
+script(src='https://cdn.jsdelivr.net/npm/normalizr@3.6.1/dist/normalizr.browser.min.js')

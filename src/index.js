@@ -7,7 +7,7 @@ const Container = require('./controllers/productsController.js');
 const { Server: HttpServer } = require('http');
 const { Server: IOServer } = require('socket.io');
 const normalizr = require('normalizr');
-const messageSchema = require('./schemas/messages');
+const messagesSchema = require('./schemas/messages');
 
 //declaracion de servidores
 const app = express();
@@ -58,10 +58,14 @@ io.on('connection', async (socket) => {
     } catch (err) {
         console.log(err);
     }
+    
+    const normalizedMessages = normalizr.normalize(messages, messagesSchema);
+    socket.emit('messages', normalizedMessages);
 
     socket.on('new-message', async (data) => {
         data.time = `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
-        messages.messages.push(data);
+        data.id = data.time;
+        //messages.messages.push(data);
         let savedMessages;
 
         try {
@@ -82,7 +86,8 @@ io.on('connection', async (socket) => {
         } catch (err) {
             console.log(err);
         }
-        io.sockets.emit('messages', [data]);
+        const normalizedData = normalizr.normalize(savedMessages, messagesSchema);
+        io.sockets.emit('messages', normalizedData);
     });
 
     //products socket
