@@ -2,16 +2,24 @@ const chatSocket = io.connect();
 
 const authorSchema = new normalizr.schema.Entity('author');
 const messagesSchema = new normalizr.schema.Entity('messages', {
-    messages: [{
-        author: authorSchema
-    }]
+    messages: [
+        {
+            author: authorSchema,
+        },
+    ],
 });
 
 chatSocket.on('messages', (data) => {
     const normalizedLength = JSON.stringify(data).length;
-    const _data = normalizr.denormalize(data.result, messagesSchema, data.entities);
-    let denormalizedLength = _data && JSON.stringify(_data).length
-    const compresion = `${Math.floor(normalizedLength/denormalizedLength*100)}%`
+    const _data = normalizr.denormalize(
+        data.result,
+        messagesSchema,
+        data.entities
+    );
+    let denormalizedLength = _data && JSON.stringify(_data).length;
+    const compresion = `${Math.floor(
+        (normalizedLength / denormalizedLength) * 100
+    )}%`;
     _data && render(_data.messages, compresion);
 });
 
@@ -48,11 +56,11 @@ $('#myForm').submit((e) => {
         const message = {
             author: {
                 id: username,
-                name: name, 
+                name: name,
                 lastName: lastName,
                 age: age,
                 alias: alias,
-                avatar: avatar
+                avatar: avatar,
             },
             text: text,
         };

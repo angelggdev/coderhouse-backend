@@ -58,7 +58,7 @@ io.on('connection', async (socket) => {
     } catch (err) {
         console.log(err);
     }
-    
+
     const normalizedMessages = normalizr.normalize(messages, messagesSchema);
     socket.emit('messages', normalizedMessages);
 
@@ -86,7 +86,10 @@ io.on('connection', async (socket) => {
         } catch (err) {
             console.log(err);
         }
-        const normalizedData = normalizr.normalize(savedMessages, messagesSchema);
+        const normalizedData = normalizr.normalize(
+            savedMessages,
+            messagesSchema
+        );
         io.sockets.emit('messages', normalizedData);
     });
 
