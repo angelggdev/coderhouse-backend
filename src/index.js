@@ -6,6 +6,8 @@ const fs = require('fs');
 const Container = require('./controllers/productsController.js');
 const { Server: HttpServer } = require('http');
 const { Server: IOServer } = require('socket.io');
+const normalizr = require('normalizr');
+const messageSchema = require('./schemas/messages');
 
 //declaracion de servidores
 const app = express();
@@ -57,12 +59,10 @@ io.on('connection', async (socket) => {
         console.log(err);
     }
 
-    socket.emit('messages', messages);
-
     socket.on('new-message', async (data) => {
         data.time = `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
-        messages.push(data);
-        let savedMessages = [];
+        messages.messages.push(data);
+        let savedMessages;
 
         try {
             savedMessages = JSON.parse(
@@ -71,7 +71,9 @@ io.on('connection', async (socket) => {
         } catch (err) {
             console.log(err);
         }
-        savedMessages.push(data);
+
+        savedMessages.messages.push(data);
+
         try {
             fs.promises.writeFile(
                 'src/txt/messages.txt',
