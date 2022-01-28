@@ -1,5 +1,5 @@
 const admin = require('firebase-admin');
-const serviceAccount = require('../utils/ecommerce-99ede-firebase-adminsdk-h6p0r-8751704e18.json');
+const serviceAccount = require('../utils/ecommerce-99ede-firebase-adminsdk-h6p0r-3777ac53dd.json');
 const { FieldValue } = require('@google-cloud/firestore');
 
 admin.initializeApp({

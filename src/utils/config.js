@@ -1,6 +1,6 @@
 // param para database: 'fs', 'firebase', 'mongo'
 const config = {
-    database: 'mongo'
+    database: 'firebase'
 }
 
 module.exports = config;

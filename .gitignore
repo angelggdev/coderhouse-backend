@@ -104,7 +104,7 @@ dist
 .tern-port
 
 # Sensitive info
-ecommerce-99ede-firebase-adminsdk-h6p0r-8751704e18.json
+ecommerce-99ede-firebase-adminsdk-h6p0r-3777ac53dd.json
 src/utils/mongo-config.js
 
 package-lock.json
