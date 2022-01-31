@@ -5,7 +5,8 @@ module.exports = function (router) {
     router.get('/', async (req, res) => {
         const list = await productContainer.getAll();
         const showList = list.length > 0 ? true : false;
-        res.render('productos.pug', { list: list, showList: showList });
+        const isLoggedIn = req.session? true: false;
+        res.render('productos.pug', { list: list, showList: showList, isLoggedIn: isLoggedIn });
     });
     
     router.get('/:id', async (req, res) => {

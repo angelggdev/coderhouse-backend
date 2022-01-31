@@ -8,6 +8,10 @@ const { Server: HttpServer } = require('http');
 const { Server: IOServer } = require('socket.io');
 const normalizr = require('normalizr');
 const messagesSchema = require('./schemas/messages');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+const {SESSION_URL} = require('../util');
 
 //declaracion de servidores
 const app = express();
@@ -34,11 +38,42 @@ server.on('error', (error) => {
     console.log('Hubo un error en el servidor' + error);
 });
 
+//configuración de sesión
+app.use(cookieParser());
+app.use(session({
+    store: new MongoStore({
+        //no me lo toma pq tengo que autenticar, ver como se hace
+        mongoUrl: SESSION_URL,
+        mongoOptions: {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        }
+    }),
+    secret: 'qwerty123',
+    resave: false,
+    saveUninitialized: false
+}));
+
 //routing
 app.get('/', async (req, res) => {
     const list = await productContainer.getAll();
     const showList = list.length > 0 ? true : false;
-    res.render('index.pug', { list: list, showList: showList });
+    const isLoggedIn = req.session.user? true: false;
+    const username = req.session.user;
+    res.render('index.pug', { list: list, showList: showList, isLoggedIn: isLoggedIn, username: username });
+});
+
+app.post('/login', async (req, res) => {
+    const username = req.body.username;
+    req.session.user = username;
+    res.redirect('/');
+});
+
+app.post('/logout', async (req, res) => {
+    req.session.destroy(err => {
+        if (err) res.send({status: 'Logout Error', body: err});
+    })
+    res.redirect('/');
 });
 
 require('./routes/products-test')(app);
