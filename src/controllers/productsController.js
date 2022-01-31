@@ -1,74 +1,72 @@
-const { options } = require('../options/db');
-const knex = require('knex')(options);
+const mongoose = require('mongoose');
+const Product = require('../models/product');
+const {API_URL} = require('../../util');
 
-class Container {
-    constructor(tableName) {
-        this.tableName = tableName;
+class ProductContainer {
+    constructor(collection) {
+        this.rta = mongoose.connect(API_URL);
     }
 
-    async save(product) {
-        if (product.id) {
-            try {
-                await knex
-                    .from(this.tableName)
-                    .where('id', product.id)
-                    .update({ ...product });
-            } catch (err) {
-                console.log(err);
-            }
-            return product.id;
-        } else {
-            let id;
-            await knex(this.tableName)
-                .insert(product)
-                .then((data) => (id = data[0]))
-                .catch((err) => console.log(err));
-            return id;
-        }
-    }
-
-    async getById(number) {
-        let object;
+    async saveProduct(item) {
+        const product = new Product(item);
         try {
-            object = await knex
-                .from(this.tableName)
-                .select('*')
-                .where('id', number);
+            await product.save();
+            return 'se agregó el producto exitosamente';
         } catch (err) {
-            console.log(err);
+            return { error: err };
         }
-        if (object.length) {
-            return object;
-        } else {
+    }
+
+    async updateProduct(item) {
+        let product;
+        try {
+            product = (await Product.find({ _id: item.id }))[0];
+        } catch (err) {
+            return {
+                error: `no se encontró un producto con el id ${item.id}`,
+            };
+        }
+        let _item = Object.fromEntries(
+            Object.entries(item).filter(([_, v]) => v !== null)
+        );
+        Object.assign(product, _item);
+        await Product.updateOne({ _id: item.id }, { $set: { ...product } });
+        return `se actualizó el producto con id ${item.id}`;
+    }
+
+    async getById(id) {
+        try {
+            return await Product.find({ _id: id });
+        } catch (err) {
             return null;
         }
     }
 
     async getAll() {
-        let list = [];
         try {
-            list = await knex.from(this.tableName).select('*');
+            const products = await Product.find();
+            if (products.length > 0) {
+                return products;
+            } else {
+                return [];
+            }
         } catch (err) {
-            console.log(err);
-        }
-        return list;
-    }
-
-    async deleteById(number) {
-        try {
-            await knex.from(this.tableName).where('id', number).del();
-        } catch (err) {
-            console.log(err);
+            return { error: err };
         }
     }
 
-    deleteAll() {
+    async deleteById(id) {
         try {
-            knex.from(this.tableName).del();
+            const product = await Product.find({ _id: id });
+            await Product.deleteOne({ _id: id });
+            return `se ha eliminado el producto con id ${id}`;
         } catch (err) {
-            console.log(err);
+            return {
+                error: `no se encontró un producto con el id ${id}`,
+            };
         }
     }
+
 }
 
-module.exports = Container;
+module.exports = ProductContainer;

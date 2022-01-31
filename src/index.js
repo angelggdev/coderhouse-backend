@@ -3,7 +3,7 @@ const express = require('express');
 const { Router } = express;
 const axios = require('axios');
 const fs = require('fs');
-const Container = require('./controllers/productsController.js');
+const ProductDao = require('./dao/ProductDao');
 const { Server: HttpServer } = require('http');
 const { Server: IOServer } = require('socket.io');
 const normalizr = require('normalizr');
@@ -16,7 +16,7 @@ const io = new IOServer(httpServer);
 
 //declaracion de otras variables
 const PORT = process.env.PORT || 8080;
-const contenedor = new Container('products');
+const productContainer = new ProductDao();
 let messages = [];
 const router = Router();
 
@@ -36,14 +36,14 @@ server.on('error', (error) => {
 
 //routing
 app.get('/', async (req, res) => {
-    const list = await contenedor.getAll();
+    const list = await productContainer.getAll();
     const showList = list.length > 0 ? true : false;
     res.render('index.pug', { list: list, showList: showList });
 });
 
 require('./routes/products-test')(app);
 
-require('./routes/products')(router, contenedor);
+require('./routes/products')(router);
 
 //api configuration
 app.use('/api/productos', router);
@@ -110,7 +110,7 @@ io.on('connection', async (socket) => {
     socket.emit('products', products);
 
     socket.on('new-product', async (data) => {
-        await contenedor.save({
+        await productContainer.saveProduct({
             name: data.title,
             price: data.price,
             thumbnail: data.thumbnail,
