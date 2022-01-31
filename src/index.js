@@ -70,10 +70,14 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/logout', async (req, res) => {
+    const username = req.session.user;
     req.session.destroy(err => {
-        if (err) res.send({status: 'Logout Error', body: err});
+        if (err) {
+            res.send({status: 'Logout Error', body: err});
+        } else {
+            res.render('logout.pug', {username: username});
+        }
     })
-    res.redirect('/');
 });
 
 require('./routes/products-test')(app);
