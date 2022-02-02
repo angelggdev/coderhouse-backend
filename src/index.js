@@ -12,6 +12,7 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const {SESSION_URL} = require('../util');
+const { auth, updateSession } = require('./middleware/middleware');
 
 //declaracion de servidores
 const app = express();
@@ -53,40 +54,24 @@ app.use(session({
     resave: false,
     saveUninitialized: false, 
     cookie:{
-        maxAge: 60000
+        maxAge: 600000
     } 
 }));
 
 //routing
-app.get('/', async (req, res) => {
+app.get('/', updateSession, async (req, res) => {
     const list = await productContainer.getAll();
     const showList = list.length > 0 ? true : false;
     const isLoggedIn = req.session.user? true: false;
     const username = req.session.user;
-    req.session.regenerate;
     res.render('index.pug', { list: list, showList: showList, isLoggedIn: isLoggedIn, username: username });
 });
 
-app.post('/login', (req, res) => {
-    const username = req.body.username;
-    req.session.user = username;
-    res.redirect('/');
-});
+require('./routes/session')(app);
 
-app.post('/logout', (req, res) => {
-    const username = req.session.user;
-    req.session.destroy(err => {
-        if (err) {
-            res.send({status: 'Logout Error', body: err});
-        } else {
-            res.render('logout.pug', {username: username});
-        }
-    })
-});
+require('./routes/products-test')(app, auth, updateSession);
 
-require('./routes/products-test')(app);
-
-require('./routes/products')(router);
+require('./routes/products')(router, auth, updateSession);
 
 //api configuration
 app.use('/api/productos', router);

@@ -1,6 +1,6 @@
 const faker = require('faker');
 
-module.exports = function (app) {
+module.exports = function (app, auth, updateSession) {
     const createProduct = () => {
         return {
             id: faker.random.alphaNumeric(),
@@ -10,7 +10,7 @@ module.exports = function (app) {
         };
     };
 
-    app.get('/api/productos-test', async (req, res) => {
+    app.get('/api/productos-test', auth, updateSession, async (req, res) => {
         const list = [];
         for (let i = 0; i < 5; i++) {
             const product = createProduct();
