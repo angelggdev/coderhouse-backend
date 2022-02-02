@@ -51,7 +51,10 @@ app.use(session({
     }),
     secret: 'qwerty123',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false, 
+    cookie:{
+        maxAge: 60000
+    } 
 }));
 
 //routing
@@ -60,16 +63,17 @@ app.get('/', async (req, res) => {
     const showList = list.length > 0 ? true : false;
     const isLoggedIn = req.session.user? true: false;
     const username = req.session.user;
+    req.session.regenerate;
     res.render('index.pug', { list: list, showList: showList, isLoggedIn: isLoggedIn, username: username });
 });
 
-app.post('/login', async (req, res) => {
+app.post('/login', (req, res) => {
     const username = req.body.username;
     req.session.user = username;
     res.redirect('/');
 });
 
-app.post('/logout', async (req, res) => {
+app.post('/logout', (req, res) => {
     const username = req.session.user;
     req.session.destroy(err => {
         if (err) {
@@ -138,10 +142,12 @@ io.on('connection', async (socket) => {
 
     async function getProducts() {
         const url = `http://localhost:${PORT}/api/productos`;
-        await axios
-            .get(url)
-            .then((res) => (products = res.data))
-            .catch((err) => console.log(err));
+        await axios(url, {
+            method: 'GET',
+            withCredentials: true
+        })
+            .then((res) => products = res.data)
+            .catch((err) => console.log(err));  
     }
 
     await getProducts();
