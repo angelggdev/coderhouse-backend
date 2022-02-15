@@ -1,10 +1,10 @@
 div(class="container d-flex flex-column justify-content-center", style='padding: 60px ;background-color: #CFCFEA; width:90vw;')
-    h2(style='text-align:center; margin:30px;') Login de Usuario
-    form(method='POST', action='/login')
+    h2(style='text-align:center; margin:30px;') Registro de Usuarios
+    form(method='POST', action='/register')
         div.mb-3
             label(for="username", class="form-label") Ingrese su nombre
             input(type="text", id="username", name="username", class="form-control")
         div.mb-3
-            label(for="password", class="form-label") Ingrese su contraseña
+            label(for="password", class="form-label") Ingrese una contraseña
             input(type="text", id="password", name="password", class="form-control")
         input(type="submit", class="btn btn-primary")

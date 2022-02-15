@@ -13,6 +13,9 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const {SESSION_URL} = require('../util');
 const { auth, updateSession } = require('./middleware/middleware');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const Users = require('./models/users');
 
 //declaracion de servidores
 const app = express();
@@ -43,7 +46,6 @@ server.on('error', (error) => {
 app.use(cookieParser());
 app.use(session({
     store: new MongoStore({
-        //no me lo toma pq tengo que autenticar, ver como se hace
         mongoUrl: SESSION_URL,
         mongoOptions: {
             useNewUrlParser: true,
@@ -58,8 +60,66 @@ app.use(session({
     } 
 }));
 
+//passport
+passport.use('login', new LocalStrategy(
+    (username, password, done) => {
+        Users.findOne({ username }, (err, user) => {
+            if(err) return done(err)
+
+            if(!user) {
+                console.log('User not found with username ' + username);
+                return done(null, false)
+            }
+
+            if (user && user.password === password) return done(null, user);
+            return {error: 'incorrect password'}
+        })
+    }
+))
+
+passport.use('signup', new LocalStrategy({ passReqToCallback: true }, (username, password, done) => {
+    Users.findOne({'username': username}, (err, user) => {
+        if(err) {
+            console.log("Error signup" + err)
+            return done(err)
+        }
+
+        if(user) {
+            console.log('User already exists')
+            return done(null, false)
+        }
+
+        const newUser = {
+            username, password
+        }
+        Users.create(newUser, (err, userWithId) => {
+            if (err) {
+                console.log('Error saving user ' + err)
+                return done(err)
+            }
+            console.log(userWithId);
+            return done(null, userWithId)
+        })
+    })
+}))
+passport.serializeUser((user, done) => {
+    done(null, user._id)
+})
+passport.deserializeUser((id, done) => {
+    Users.findById(id, done)
+})
+
+
+//passport middleware
+app.use(passport.initialize())
+app.use(passport.session())
+app.use((req, res, next) => {
+    next()
+})
+
 //routing
 app.get('/', updateSession, async (req, res) => {
+    console.log(req.session)
     const list = await productContainer.getAll();
     const showList = list.length > 0 ? true : false;
     const isLoggedIn = req.session.user? true: false;
@@ -67,7 +127,7 @@ app.get('/', updateSession, async (req, res) => {
     res.render('index.pug', { list: list, showList: showList, isLoggedIn: isLoggedIn, username: username });
 });
 
-require('./routes/session')(app);
+require('./routes/session')(app, passport);
 
 require('./routes/products-test')(app, auth, updateSession);
 

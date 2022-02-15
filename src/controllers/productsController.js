@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 const Product = require('../models/product');
-const {API_URL} = require('../../util');
+const {DB_URL} = require('../../util');
 
 class ProductContainer {
-    constructor(collection) {
-        this.rta = mongoose.connect(API_URL);
+    constructor() {
+        this.rta = mongoose.connect(DB_URL);
     }
 
     async saveProduct(item) {
