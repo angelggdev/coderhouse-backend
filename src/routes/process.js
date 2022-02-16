@@ -23,7 +23,7 @@ module.exports = function(app) {
     app.get('/api/randoms', (req, res) => {
         const controller = new AbortController();
         const { signal } = controller;
-        const child = fork('./src/random/random.js', [req.query.params || 100000000], { signal });
+        const child = fork('./src/random/random.js', [req.params.cant || 100000000], { signal });
         child.on('error', (err) => {
             console.log(err)
         });
