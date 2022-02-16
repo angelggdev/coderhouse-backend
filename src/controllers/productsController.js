@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Product = require('../models/product');
-const {DB_URL} = require('../../util');
+const { DB_URL } = require('../../util');
 
 class ProductContainer {
     constructor() {
@@ -66,7 +66,6 @@ class ProductContainer {
             };
         }
     }
-
 }
 
 module.exports = ProductContainer;
