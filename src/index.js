@@ -37,6 +37,7 @@ server.on('error', (error) => {
     console.log('Hubo un error en el servidor' + error);
 });
 
+
 //configuración de sesión
 app.use(cookieParser());
 app.use(
@@ -143,6 +144,8 @@ require('./routes/session')(app, passport);
 require('./routes/products-test')(app, auth, updateSession);
 
 require('./routes/products')(router, auth, updateSession);
+
+require('./routes/process')(app);
 
 //api configuration
 app.use('/api/productos', router);
