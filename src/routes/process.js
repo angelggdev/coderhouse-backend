@@ -1,6 +1,6 @@
 const { fork } = require('child_process');
 
-module.exports = function(app) {
+module.exports = function (app) {
     app.get('/info', (req, res) => {
         const args = process.argv;
         const os = process.platform;
@@ -16,20 +16,24 @@ module.exports = function(app) {
             rss,
             execPath,
             pid,
-            projectDir
-        })
-    })
+            projectDir,
+        });
+    });
 
     app.get('/api/randoms', (req, res) => {
         const controller = new AbortController();
         const { signal } = controller;
-        const child = fork('./src/random/random.js', [req.params.cant || 100000000], { signal });
+        const child = fork(
+            './src/random/random.js',
+            [req.query.cant || 100000000],
+            { signal }
+        );
         child.on('error', (err) => {
-            console.log(err)
+            console.log(err);
         });
         child.send('start');
         child.on('message', (data) => {
-            res.send(data)
-        })
-    })
-}
+            res.send(data);
+        });
+    });
+};
