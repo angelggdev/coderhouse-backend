@@ -16,6 +16,7 @@ const { auth, updateSession } = require('./middleware/middleware');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const Users = require('./models/users');
+const bcrypt = require('bcrypt');
 
 //declaracion de servidores
 const app = express();
@@ -56,9 +57,23 @@ app.use(session({
     resave: false,
     saveUninitialized: false, 
     cookie:{
-        maxAge: 600000
+        maxAge: 600000,
+        secure: false,
+        httpOnly:false
     } 
 }));
+
+//bcrypt encriptation
+function createHash(password) {
+    return bcrypt.hashSync(
+        password,
+        bcrypt.genSaltSync(10),
+        null
+    );
+}  
+function isPasswordValid(password, encryptedPassword) {
+    return bcrypt.compareSync(password, encryptedPassword)
+}
 
 //passport
 passport.use('login', new LocalStrategy(
@@ -67,40 +82,40 @@ passport.use('login', new LocalStrategy(
             if(err) return done(err)
 
             if(!user) {
-                console.log('User not found with username ' + username);
                 return done(null, false)
             }
 
-            if (user && user.password === password) return done(null, user);
-            return {error: 'incorrect password'}
+            if (user && isPasswordValid(password, user.password)) return done(null, user);
+            return done(null, false)
         })
     }
 ))
 
-passport.use('signup', new LocalStrategy({ passReqToCallback: true }, (username, password, done) => {
-    Users.findOne({'username': username}, (err, user) => {
-        if(err) {
-            console.log("Error signup" + err)
-            return done(err)
-        }
-
-        if(user) {
-            console.log('User already exists')
-            return done(null, false)
-        }
-
-        const newUser = {
-            username, password
-        }
-        Users.create(newUser, (err, userWithId) => {
-            if (err) {
-                console.log('Error saving user ' + err)
+passport.use(
+    'signup', 
+    new LocalStrategy(
+        { passReqToCallback: true }, 
+        (req, username, password, done) => {
+        Users.findOne({'username': username}, (err, user) => {
+            if(err) {
                 return done(err)
             }
-            console.log(userWithId);
-            return done(null, userWithId)
+
+            if(user) {
+                return done(null, false)
+            }
+
+            const newUser = {
+                username, 
+                password: createHash(password)
+            }
+            Users.create(newUser, (err, userWithId) => {
+                if (err) {
+                    return done(err)
+                }
+                return done(null, userWithId)
+            })
         })
-    })
 }))
 passport.serializeUser((user, done) => {
     done(null, user._id)
@@ -119,7 +134,6 @@ app.use((req, res, next) => {
 
 //routing
 app.get('/', updateSession, async (req, res) => {
-    console.log(req.session)
     const list = await productContainer.getAll();
     const showList = list.length > 0 ? true : false;
     const isLoggedIn = req.session.user? true: false;

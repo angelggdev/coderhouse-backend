@@ -15,20 +15,28 @@ module.exports = function (app, passport) {
 
     app.post(
         '/register',
-        passport.authenticate('signup', {failureRedirect: '/failsignup'}),
+        passport.authenticate('signup', {failureRedirect: '/register-error'}),
         (req, res) => {
             res.redirect('/');
         }
     )
 
+    app.get('/register-error', (req, res) => {
+        res.render('register-error')
+    })
+
     app.post(
         '/login', 
-        passport.authenticate('login'), 
+        passport.authenticate('login', {failureRedirect: '/login-error'}), 
         (req, res) => {
         const username = req.body.username;
         req.session.user = username;
         res.redirect('/');
     });
+
+    app.get('/login-error', (req, res) => {
+        res.render('login-error')
+    })
     
     app.post('/logout', (req, res) => {
         const username = req.session.user;
