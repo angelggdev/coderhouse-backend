@@ -1,4 +1,5 @@
 const { fork } = require('child_process');
+const { redirect } = require('express/lib/response');
 
 module.exports = function (app) {
     app.get('/info', (req, res) => {
@@ -21,19 +22,6 @@ module.exports = function (app) {
     });
 
     app.get('/api/randoms', (req, res) => {
-        const controller = new AbortController();
-        const { signal } = controller;
-        const child = fork(
-            './src/random/random.js',
-            [req.query.cant || 100000000],
-            { signal }
-        );
-        child.on('error', (err) => {
-            console.log(err);
-        });
-        child.send('start');
-        child.on('message', (data) => {
-            res.send(data);
-        });
+        res.redirect('http://localhost:8081');
     });
 };

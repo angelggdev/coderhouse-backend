@@ -1,6 +1,7 @@
 const express = require('express');
 const { Router } = express;
 const ProductDao = require('./dao/ProductDao');
+const http = require('http');
 const { Server: HttpServer } = require('http');
 const { Server: IOServer } = require('socket.io');
 const cookieParser = require('cookie-parser');
@@ -12,6 +13,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const Users = require('./models/users');
 const bcrypt = require('bcrypt');
+const cluster = require('cluster');
 
 //declaracion de servidores
 const app = express();
@@ -30,13 +32,30 @@ app.set('view engine', 'pug');
 //configuración del servidor
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-const server = httpServer.listen(PORT, () => {
-    console.log(`El servidor está corriendo en el puerto ${PORT}`);
-});
-server.on('error', (error) => {
-    console.log('Hubo un error en el servidor' + error);
-});
-
+if (cluster.isPrimary) {
+    const server = httpServer.listen(PORT, () => {
+        console.log(`El servidor está corriendo en el puerto ${PORT}`);
+    });
+    server.on('error', (error) => {
+        console.log('Hubo un error en el servidor' + error);
+    });
+    cluster.fork();
+} else {
+    const secondServer = http.createServer((req, res) => {
+        console.log('Second server running on port 8081')
+        const count = {};
+        const num = req.query?.cant || 100000000;
+        for (let i = 0; i < num; i++) {
+            let number = Math.random();
+            number = Math.ceil(number * 1000);
+            count[number] = count[number] ? count[number] + 1 : 1;
+        }
+        res.end(JSON.stringify(count));
+    }).listen(8081);
+    secondServer.on('error', (err) => {
+        console.log('Hubo un error al iniciar el segundo servidor')
+    })
+}
 
 //configuración de sesión
 app.use(cookieParser());
