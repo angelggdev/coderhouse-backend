@@ -22,6 +22,13 @@ module.exports = function (app) {
     });
 
     app.get('/api/randoms', (req, res) => {
-        res.redirect('http://localhost:8081');
+        const count = {};
+        const num = req.query?.cant || 100000000;
+        for (let i = 0; i < num; i++) {
+            let number = Math.random();
+            number = Math.ceil(number * 1000);
+            count[number] = count[number] ? count[number] + 1 : 1;
+        }
+        res.end(JSON.stringify(count));
     });
 };
